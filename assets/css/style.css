@@ -2361,3 +2361,381 @@ not his face, hands or watch.
         margin-top: -38px;
     }
 }
+/* =====================================================
+   OLD-TIMEY PORTRAIT DEVELOPMENT ANIMATION
+   ===================================================== */
+
+.companion-portrait-wrap {
+    position: relative;
+    width: min(100%, 390px);
+    aspect-ratio: 4 / 5;
+    margin-inline: auto;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 8px;
+    background:
+        radial-gradient(
+            circle at 50% 38%,
+            rgba(240, 216, 166, 0.9),
+            rgba(177, 137, 85, 0.7) 62%,
+            rgba(78, 47, 28, 0.88)
+        );
+}
+
+.companion-portrait {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center top;
+    opacity: 0;
+    transform: scale(1.035);
+    transition:
+        opacity 1.1s ease,
+        transform 1.5s ease,
+        filter 1.25s ease;
+}
+
+.portrait-developing {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    opacity: 1;
+    transition:
+        opacity 0.8s ease,
+        visibility 0.8s ease;
+    background:
+        linear-gradient(
+            115deg,
+            transparent 25%,
+            rgba(255, 244, 208, 0.23) 42%,
+            transparent 58%
+        ),
+        repeating-linear-gradient(
+            0deg,
+            rgba(71, 42, 23, 0.05) 0,
+            rgba(71, 42, 23, 0.05) 1px,
+            transparent 1px,
+            transparent 4px
+        );
+}
+
+.portrait-paper-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.38;
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(83, 48, 25, 0.12) 0 1px,
+            transparent 2px
+        ),
+        radial-gradient(
+            circle at 72% 66%,
+            rgba(255, 244, 210, 0.15) 0 1px,
+            transparent 2px
+        );
+    background-size: 13px 17px, 19px 23px;
+    animation: portraitGrain 0.35s steps(2) infinite;
+}
+
+.portrait-ink-line {
+    position: absolute;
+    left: 13%;
+    width: 74%;
+    height: 2px;
+    opacity: 0;
+    transform-origin: left center;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(71, 41, 22, 0.75),
+        transparent
+    );
+    box-shadow:
+        0 4px 0 rgba(71, 41, 22, 0.09),
+        0 -4px 0 rgba(71, 41, 22, 0.06);
+}
+
+.portrait-ink-line-one {
+    top: 29%;
+    animation: drawPortraitLine 1.9s ease-in-out infinite;
+}
+
+.portrait-ink-line-two {
+    top: 47%;
+    animation: drawPortraitLine 1.9s 0.4s ease-in-out infinite;
+}
+
+.portrait-ink-line-three {
+    top: 64%;
+    animation: drawPortraitLine 1.9s 0.8s ease-in-out infinite;
+}
+
+.portrait-spark {
+    position: absolute;
+    z-index: 3;
+    color: #f6d778;
+    font-size: 1.35rem;
+    line-height: 1;
+    opacity: 0;
+    text-shadow:
+        0 0 6px rgba(246, 215, 120, 0.8),
+        0 0 14px rgba(246, 215, 120, 0.46);
+    animation: portraitSpark 2.4s ease-in-out infinite;
+}
+
+.portrait-spark-one {
+    top: 16%;
+    left: 19%;
+}
+
+.portrait-spark-two {
+    top: 33%;
+    right: 15%;
+    animation-delay: 0.55s;
+}
+
+.portrait-spark-three {
+    right: 22%;
+    bottom: 21%;
+    animation-delay: 1.1s;
+}
+
+.portrait-spark-four {
+    left: 17%;
+    bottom: 31%;
+    animation-delay: 1.55s;
+}
+
+.portrait-loading-copy {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: max-content;
+    max-width: 88%;
+    padding: 9px 14px;
+    transform: translateX(-50%);
+    border: 1px solid rgba(91, 56, 33, 0.3);
+    border-radius: 999px;
+    color: #50321f;
+    background: rgba(244, 225, 183, 0.82);
+    box-shadow: 0 7px 20px rgba(52, 30, 17, 0.13);
+    font-size: 0.84rem;
+    text-align: center;
+    backdrop-filter: blur(3px);
+}
+
+.portrait-quill {
+    display: inline-block;
+    font-size: 1.1rem;
+    animation: quillWriting 1.2s ease-in-out infinite;
+}
+
+/*
+The file has loaded, but remains mysterious until the reading is unlocked.
+*/
+
+.portrait-is-loaded .companion-portrait {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.portrait-is-loaded .portrait-developing {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.companion-portrait.portrait-obscured {
+    filter:
+        sepia(0.95)
+        blur(17px)
+        brightness(0.63)
+        contrast(1.16);
+    transform: scale(1.09);
+}
+
+/*
+Second reveal: used when the £0.99 reading is unlocked.
+*/
+
+.companion-portrait-wrap.portrait-is-revealing
+.companion-portrait {
+    animation: oldPhotoReveal 1.65s cubic-bezier(0.2, 0.8, 0.25, 1)
+        both;
+}
+
+.portrait-reveal-flash {
+    position: absolute;
+    inset: -25%;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-75%) rotate(8deg);
+    background: linear-gradient(
+        110deg,
+        transparent 34%,
+        rgba(255, 236, 172, 0.07) 43%,
+        rgba(255, 236, 172, 0.72) 50%,
+        rgba(255, 236, 172, 0.08) 57%,
+        transparent 66%
+    );
+}
+
+.portrait-is-revealing .portrait-reveal-flash {
+    animation: portraitRevealSweep 1.45s ease-out forwards;
+}
+
+.portrait-is-revealing .portrait-spark {
+    z-index: 7;
+    animation-duration: 1.15s;
+}
+
+.companion-portrait-wrap.portrait-is-revealed
+.companion-portrait {
+    opacity: 1;
+    filter:
+        sepia(0.26)
+        blur(0)
+        brightness(1)
+        contrast(1.04);
+    transform: scale(1);
+}
+
+/* Animation keyframes */
+
+@keyframes drawPortraitLine {
+    0% {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    18% {
+        opacity: 0.72;
+    }
+
+    66% {
+        opacity: 0.42;
+        transform: scaleX(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scaleX(1);
+    }
+}
+
+@keyframes portraitSpark {
+    0%,
+    100% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.35) rotate(0);
+    }
+
+    35% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(20deg);
+    }
+
+    65% {
+        opacity: 0.65;
+        transform: translateY(-8px) scale(0.72) rotate(42deg);
+    }
+}
+
+@keyframes portraitGrain {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(-1px, 1px);
+    }
+
+    50% {
+        transform: translate(1px, -1px);
+    }
+
+    75% {
+        transform: translate(1px, 1px);
+    }
+}
+
+@keyframes quillWriting {
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(-7deg);
+    }
+
+    50% {
+        transform: translate(3px, -2px) rotate(3deg);
+    }
+}
+
+@keyframes portraitRevealSweep {
+    0% {
+        opacity: 0;
+        transform: translateX(-75%) rotate(8deg);
+    }
+
+    24% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(78%) rotate(8deg);
+    }
+}
+
+@keyframes oldPhotoReveal {
+    0% {
+        filter:
+            sepia(1)
+            blur(17px)
+            brightness(0.58)
+            contrast(1.2);
+        transform: scale(1.09);
+    }
+
+    48% {
+        filter:
+            sepia(0.82)
+            blur(7px)
+            brightness(1.15)
+            contrast(1.07);
+    }
+
+    100% {
+        filter:
+            sepia(0.26)
+            blur(0)
+            brightness(1)
+            contrast(1.04);
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .portrait-paper-grain,
+    .portrait-ink-line,
+    .portrait-spark,
+    .portrait-quill,
+    .portrait-is-revealing .portrait-reveal-flash,
+    .portrait-is-revealing .companion-portrait {
+        animation: none !important;
+    }
+
+    .companion-portrait,
+    .portrait-developing {
+        transition-duration: 0.15s;
+    }
+}

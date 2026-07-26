@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A vintage-style entertainment quiz that creates a playful future partner reading.">
+    <meta name="theme-color" content="#3d2a24">
+
+    <title>The Marriage Oracle</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+
+   <link rel="stylesheet" href="assets/css/style.css">
+
+<script src="assets/js/app.js" defer></script>
+<script src="assets/js/quiz.js" defer></script>
+<script src="assets/js/portraits.js" defer></script>
+<script src="assets/js/auth.js" defer></script>
+<script src="assets/js/results.js" defer></script>
+<script src="assets/js/payments.js" defer></script>
+</head>
+<body>
+    <div class="paper-noise" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="#home" aria-label="The Marriage Oracle home">
+                <span class="brand-seal" aria-hidden="true">M</span>
+
+                <span class="brand-copy">
+                    <strong>The Marriage Oracle</strong>
+                    <small>A vintage love reading</small>
+                </span>
+            </a>
+
+            <nav class="main-nav" aria-label="Main navigation">
+                <a href="#how-it-works">How it works</a>
+                <a href="#reading-includes">Your reading</a>
+                <a href="#questions">Questions</a>
+
+                <button
+                    id="header-start-button"
+                    class="header-button"
+                    type="button"
+                >
+                    Begin reading
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="app">
+
+        <!-- ======================================
+             HOME PAGE
+             ====================================== -->
+
+        <section id="home-screen" class="screen home-screen">
+
+            <div class="hero-section" id="home">
+
+                <div class="hero-copy">
+                    <p class="kicker">
+                        A personalised entertainment experience
+                    </p>
+
+                    <h1>
+                        Discover the story of your future companion
+                    </h1>
+
+                    <p class="hero-description">
+                        Answer a thoughtful series of questions and receive
+                        a beautifully presented, vintage-style compatibility
+                        reading made from your choices.
+                    </p>
+
+                    <div class="hero-actions">
+                        <button
+                            id="hero-start-button"
+                            class="primary-button"
+                            type="button"
+                        >
+                            Begin My Reading
+                        </button>
+
+                        <a class="text-link" href="#how-it-works">
+                            See how it works
+                        </a>
+                    </div>
+
+                    <div class="trust-row" aria-label="Key features">
+                        <span>24 thoughtful questions</span>
+                        <span>Inclusive matching</span>
+                        <span>Easy to use on phones</span>
+                    </div>
+                </div>
+
+                <div
+                    class="oracle-display"
+                    aria-label="Illustration of the vintage matchmaker guide"
+                >
+                   <div class="ornamental-frame matchmaker-frame">
+
+    <img
+        class="matchmaker-image"
+        src="assets/images/matchmaker/matchmaker.png"
+        alt="The Marriage Oracle's friendly Victorian matchmaker"
+    >
+
+    <div class="frame-stars" aria-hidden="true">✦</div>
+
+</div>
+                    <div class="guide-message">
+                        <span class="quote-mark" aria-hidden="true">“</span>
+
+                        <p id="home-guide-message">
+                            The smallest choices often reveal the greatest clues.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <section class="stat-strip" aria-label="Reading features">
+                <article>
+                    <strong>24</strong>
+                    <span>Personal questions</span>
+                </article>
+
+                <article>
+                    <strong>7</strong>
+                    <span>Detailed result areas</span>
+                </article>
+
+                <article>
+                    <strong>1</strong>
+                    <span>Unique reading from your answers</span>
+                </article>
+
+                <article>
+                    <strong>100%</strong>
+                    <span>Entertainment focused</span>
+                </article>
+            </section>
+
+            <section id="how-it-works" class="content-section">
+
+                <div class="section-heading">
+                    <p class="kicker">Simple from beginning to end</p>
+                    <h2>How your reading works</h2>
+                </div>
+
+                <div class="steps-grid">
+
+                    <article class="step-card">
+                        <span class="step-number">I</span>
+                        <h3>Tell us about yourself</h3>
+
+                        <p>
+                            Choose clear, easy answers about your personality,
+                            values, lifestyle and romantic preferences.
+                        </p>
+                    </article>
+
+                    <article class="step-card">
+                        <span class="step-number">II</span>
+                        <h3>The oracle studies your choices</h3>
+
+                        <p>
+                            Your answers are combined to create a consistent
+                            entertainment result tailored to your selections.
+                        </p>
+                    </article>
+
+                    <article class="step-card">
+                        <span class="step-number">III</span>
+                        <h3>Receive your companion reading</h3>
+
+                        <p>
+                            See a compatibility score, name clue, silhouette
+                            and a collection of detailed relationship predictions.
+                        </p>
+                    </article>
+
+                </div>
+            </section>
+
+            <section
+                id="reading-includes"
+                class="content-section parchment-panel"
+            >
+                <div class="section-heading">
+                    <p class="kicker">More than a single initial</p>
+                    <h2>What your reading includes</h2>
+                </div>
+
+                <div class="feature-grid">
+
+                    <article>
+                        <span aria-hidden="true">✒</span>
+                        <h3>Name clue</h3>
+                        <p>A possible first initial and suggested name.</p>
+                    </article>
+
+                    <article>
+                        <span aria-hidden="true">♙</span>
+                        <h3>Companion silhouette</h3>
+                        <p>
+                            A mysterious outline based on your stated preference.
+                        </p>
+                    </article>
+
+                    <article>
+                        <span aria-hidden="true">❦</span>
+                        <h3>Personality profile</h3>
+                        <p>
+                            The qualities and habits your answers suggest.
+                        </p>
+                    </article>
+
+                    <article>
+                        <span aria-hidden="true">⌖</span>
+                        <h3>Meeting story</h3>
+                        <p>
+                            A playful prediction of where your paths may cross.
+                        </p>
+                    </article>
+
+                    <article>
+                        <span aria-hidden="true">◷</span>
+                        <h3>Timing clue</h3>
+                        <p>
+                            A possible period for a meaningful relationship milestone.
+                        </p>
+                    </article>
+
+                    <article>
+                        <span aria-hidden="true">⌂</span>
+                        <h3>Future life</h3>
+                        <p>
+                            A picture of the home and companionship you may enjoy.
+                        </p>
+                    </article>
+
+                </div>
+            </section>
+
+            <section
+                id="questions"
+                class="content-section question-preview-section"
+            >
+                <div class="section-heading">
+                    <p class="kicker">Thoughtful, clear and inclusive</p>
+
+                    <h2>
+                        Questions that make the result feel personal
+                    </h2>
+
+                    <p>
+                        You can enter your own lucky number, choose who you
+                        would like your prediction to describe, and select
+                        “prefer not to say” wherever appropriate.
+                    </p>
+                </div>
+
+                <div class="preview-cards">
+
+                    <article>
+                        <span>Personality</span>
+                        <strong>
+                            What makes you feel most understood?
+                        </strong>
+                    </article>
+
+                    <article>
+                        <span>Lifestyle</span>
+                        <strong>
+                            Where would your happiest home be?
+                        </strong>
+                    </article>
+
+                    <article>
+                        <span>Romance</span>
+                        <strong>
+                            Which quality first catches your attention?
+                        </strong>
+                    </article>
+
+                </div>
+
+                <button
+                    id="bottom-start-button"
+                    class="primary-button wide-button"
+                    type="button"
+                >
+                    Start the 24-Question Reading
+                </button>
+            </section>
+        </section>
+
+        <!-- ======================================
+             PROFILE OR GUEST PAGE
+             ====================================== -->
+
+        <section id="profile-screen" class="screen app-screen" hidden>
+            <div class="app-panel profile-panel">
+
+                <button
+                    class="back-home-button"
+                    data-go-home
+                    type="button"
+                >
+                    ← Return home
+                </button>
+
+                <div class="section-heading compact-heading">
+                    <p class="kicker">Before we begin</p>
+                    <h2>How would you like to continue?</h2>
+
+                    <p>
+                        You can take the reading as a guest or save your
+                        name and email on this device for convenience.
+                    </p>
+                </div>
+
+                <div class="profile-choice-grid">
+
+                    <article class="choice-card">
+                        <span class="choice-icon" aria-hidden="true">♙</span>
+
+                        <h3>Continue as guest</h3>
+
+                        <p>
+                            No sign-in and no personal details required.
+                        </p>
+
+                        <button
+                            id="guest-button"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Continue as Guest
+                        </button>
+                    </article>
+
+                    <article class="choice-card featured-choice">
+                        <span class="choice-icon" aria-hidden="true">✉</span>
+
+                        <h3>Save this reading</h3>
+
+                        <p>
+                            Your name and email are stored only in this browser
+                            in the current version.
+                        </p>
+
+                        <form id="profile-form" novalidate>
+
+                            <label for="profile-name">
+                                First name
+                            </label>
+
+                            <input
+                                id="profile-name"
+                                class="text-input"
+                                type="text"
+                                maxlength="30"
+                                autocomplete="given-name"
+                                placeholder="For example, Margaret"
+                            >
+
+                            <label for="profile-email">
+                                Email address
+                            </label>
+
+                            <input
+                                id="profile-email"
+                                class="text-input"
+                                type="email"
+                                maxlength="120"
+                                autocomplete="email"
+                                placeholder="name@example.com"
+                            >
+
+                            <p
+                                id="profile-error"
+                                class="form-error"
+                                role="alert"
+                                hidden
+                            ></p>
+
+                            <button
+                                class="primary-button"
+                                type="submit"
+                            >
+                                Save and Continue
+                            </button>
+                        </form>
+                    </article>
+
+                </div>
+
+                <p class="small-note">
+                    This prototype does not create a real online account or
+                    send email. Real accounts require a secure database and
+                    login service.
+                </p>
+            </div>
+        </section>
+
+        <!-- ======================================
+             QUIZ PAGE
+             ====================================== -->
+
+        <section id="quiz-screen" class="screen app-screen" hidden>
+
+            <div class="quiz-layout">
+
+                <aside class="quiz-guide-panel">
+
+                    <div class="mini-frame">
+
+    <img
+        class="mini-matchmaker-image"
+        src="assets/images/matchmaker/matchmaker.png"
+        alt=""
+        aria-hidden="true"
+    >
+
+</div>
+
+                    <p id="guide-speech" class="guide-speech">
+                        Let us begin with a simple detail.
+                    </p>
+
+                    <button
+                        id="quit-quiz-button"
+                        class="quiet-button"
+                        type="button"
+                    >
+                        Save and leave
+                    </button>
+                </aside>
+
+                <div class="quiz-main-panel">
+
+                    <div class="progress-panel">
+
+                        <div class="progress-topline">
+                            <span id="section-name">About you</span>
+                            <span id="progress-count">
+                                Question 1 of 24
+                            </span>
+                        </div>
+
+                        <div class="progress-ornament" aria-hidden="true">
+                            <span>✦</span>
+
+                            <div
+                                id="progress-track"
+                                class="progress-track"
+                                role="progressbar"
+                                aria-label="Quiz progress"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                aria-valuenow="4"
+                            >
+                                <div
+                                    id="progress-bar"
+                                    class="progress-bar"
+                                ></div>
+                            </div>
+
+                            <span>✦</span>
+                        </div>
+
+                        <div class="progress-details">
+                            <span id="progress-percentage">
+                                4% complete
+                            </span>
+
+                            <span id="saved-status">
+                                Answers save on this device
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="question-card">
+
+                        <p
+                            id="question-number-label"
+                            class="question-number-label"
+                        >
+                            Question I
+                        </p>
+
+                        <h2 id="question-title">
+                            What is your first name?
+                        </h2>
+
+                        <p
+                            id="question-help"
+                            class="question-help"
+                        >
+                            This is used only to personalise the wording
+                            of your result.
+                        </p>
+
+                        <form id="question-form" novalidate>
+
+                            <div
+                                id="answer-area"
+                                class="answer-area"
+                            ></div>
+
+                            <p
+                                id="question-error"
+                                class="form-error"
+                                role="alert"
+                                hidden
+                            ></p>
+
+                            <div class="quiz-navigation">
+
+                                <button
+                                    id="back-button"
+                                    class="secondary-button"
+                                    type="button"
+                                >
+                                    ← Previous
+                                </button>
+
+                                <button
+                                    id="next-button"
+                                    class="primary-button"
+                                    type="submit"
+                                >
+                                    Continue →
+                                </button>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================================
+             LOADING PAGE
+             ====================================== -->
+
+        <section id="loading-screen" class="screen app-screen" hidden>
+
+            <div class="loading-panel">
+
+                <div class="analysis-seal" aria-hidden="true">
+                    <div class="seal-ring">
+                        <span>❦</span>
+                    </div>
+                </div>
+
+                <p class="kicker">
+                    The reading is being prepared
+                </p>
+
+                <h2>
+                    The oracle is studying your answers
+                </h2>
+
+                <p
+                    id="loading-message"
+                    class="loading-message"
+                    aria-live="polite"
+                >
+                    Arranging the first clues...
+                </p>
+
+                <div
+                    class="analysis-list"
+                    aria-label="Analysis stages"
+                >
+                    <span
+                        id="analysis-one"
+                        class="analysis-item active"
+                    >
+                        Personality pattern
+                    </span>
+
+                    <span
+                        id="analysis-two"
+                        class="analysis-item"
+                    >
+                        Relationship values
+                    </span>
+
+                    <span
+                        id="analysis-three"
+                        class="analysis-item"
+                    >
+                        Lifestyle compatibility
+                    </span>
+
+                    <span
+                        id="analysis-four"
+                        class="analysis-item"
+                    >
+                        Companion profile
+                    </span>
+                </div>
+
+                <div
+                    class="loading-progress-track"
+                    role="progressbar"
+                    aria-label="Reading preparation"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                >
+                    <div
+                        id="loading-progress-bar"
+                        class="loading-progress-bar"
+                    ></div>
+                </div>
+
+                <strong id="loading-percentage">
+                    0%
+                </strong>
+            </div>
+        </section>
+
+        <!-- ======================================
+             RESULTS PAGE
+             ====================================== -->
+
+        <section id="result-screen" class="screen app-screen" hidden>
+
+            <div class="result-page">
+
+                <div class="result-heading">
+                    <p class="kicker">Your companion reading</p>
+
+                    <h2 id="result-main-title">
+                        A meaningful connection is indicated
+                    </h2>
+
+                    <p id="result-summary">
+                        Your answers point towards a warm and steady partnership.
+                    </p>
+                </div>
+
+                <div class="result-hero-grid">
+
+                    <div class="silhouette-panel">
+
+                       <div class="companion-portrait-wrap">
+    <img
+        id="companion-portrait"
+        class="companion-portrait portrait-obscured"
+        src=""
+        alt="Vintage portrait selected for this companion reading"
+    >
+</div>
+
+                        <p id="silhouette-caption">
+                            A mysterious companion
+                        </p>
+                    </div>
+
+                    <div class="teaser-panel">
+
+                        <p class="teaser-label">
+                            Their name may begin with
+                        </p>
+
+                        <div
+                            id="result-initial"
+                            class="initial-seal"
+                        >
+                            A
+                        </div>
+
+                        <div class="compatibility-row">
+                            <span>Compatibility indication</span>
+
+                            <strong id="compatibility-score">
+                                88%
+                            </strong>
+                        </div>
+
+                        <div class="free-clues">
+
+                            <div>
+                                <span>Temperament</span>
+
+                                <strong id="free-temperament">
+                                    Warm and dependable
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Meeting clue</span>
+
+                                <strong id="free-meeting-clue">
+                                    Through a shared connection
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Relationship style</span>
+
+                                <strong id="free-relationship-style">
+                                    Steady and affectionate
+                                </strong>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <section class="locked-reading-section">
+
+                    <div class="locked-heading">
+                        <div>
+                            <p class="kicker">The full reading</p>
+                            <h3>Seven detailed clues are ready</h3>
+                        </div>
+
+                        <span
+                            class="price-badge"
+                            id="price-badge"
+                        >
+                            £2.49
+                        </span>
+                    </div>
+
+                    <div
+                        id="premium-reading"
+                        class="premium-reading locked"
+                    >
+
+                        <article class="reading-card">
+                            <span class="reading-icon">✒</span>
+
+                            <div>
+                                <small>Possible name</small>
+
+                                <strong id="partner-name">
+                                    Alexander
+                                </strong>
+
+                                <p id="name-explanation">
+                                    A traditional name with a calm,
+                                    reassuring energy.
+                                </p>
+                            </div>
+                        </article>
+
+                        <article class="reading-card">
+                            <span class="reading-icon">❦</span>
+
+                            <div>
+                                <small>Personality</small>
+
+                                <strong id="partner-personality">
+                                    Kind, patient and quietly humorous
+                                </strong>
+
+                                <p id="personality-explanation">
+                                    They are likely to value consistency
+                                    and genuine companionship.
+                                </p>
+                            </div>
+                        </article>
+
+                        <article class="reading-card">
+                            <span class="reading-icon">♙</span>
+
+                            <div>
+                                <small>Appearance clue</small>
+
+                                <strong id="partner-appearance">
+                                    Kind eyes and an understated style
+                                </strong>
+
+                                <p id="appearance-explanation">
+                                    Their warmth is likely to be more
+                                    memorable than any single feature.
+                                </p>
+                            </div>
+                        </article>
+
+                        <article class="reading-card">
+                            <span class="reading-icon">⌖</span>
+
+                            <div>
+                                <small>Where you may meet</small>
+
+                                <strong id="meeting-place">
+                                    Through friends or a familiar community
+                                </strong>
+
+                                <p id="meeting-explanation">
+                                    The connection may begin naturally rather
+                                    than through a dramatic introduction.
+                                </p>
+                            </div>
+                        </article>
+
+                        <article class="reading-card">
+                            <span class="reading-icon">◷</span>
+
+                            <div>
+                                <small>Relationship timing</small>
+
+                                <strong id="relationship-year">
+                                    2029
+                                </strong>
+
+                                <p id="timing-explanation">
+                                    This indicates a period when your routine
+                                    may open to a new connection.
+                                </p>
+                            </div>
+                        </article>
+
+                        <article class="reading-card">
+                            <span class="reading-icon">⌂</span>
+
+                            <div>
+                                <small>Future life</small>
+
+                                <strong id="future-home">
+                                    A comfortable home near family
+                                </strong>
+
+                                <p id="home-explanation">
+                                    Your result favours familiarity, warmth
+                                    and shared traditions.
+                                </p>
+                            </div>
+                        </article>
+
+                        <article class="reading-card">
+                            <span class="reading-icon">✦</span>
+
+                            <div>
+                                <small>Oracle message</small>
+
+                                <strong id="oracle-message">
+                                    The strongest bond begins with trust.
+                                </strong>
+
+                                <p id="message-explanation">
+                                    Do not overlook the person who makes
+                                    ordinary moments feel peaceful.
+                                </p>
+                            </div>
+                        </article>
+
+                        <div
+                            id="locked-overlay"
+                            class="locked-overlay"
+                        >
+                            <span
+                                class="lock-symbol"
+                                aria-hidden="true"
+                            >
+                                ♜
+                            </span>
+
+                            <h3>
+                                Your detailed reading is prepared
+                            </h3>
+
+                            <p>
+                                Unlock the possible name, personality,
+                                appearance, meeting story, timing and
+                                future-life clues.
+                            </p>
+
+                            <button
+                                id="unlock-button"
+                                class="primary-button"
+                                type="button"
+                            >
+                                Preview Full Reading — £2.49
+                            </button>
+
+                            <small id="payment-note">
+                                Demo mode is active. No payment will be taken.
+                            </small>
+                        </div>
+                    </div>
+                </section>
+
+                <div
+                    id="result-actions"
+                    class="result-actions"
+                    hidden
+                >
+                    <button
+                        id="share-button"
+                        class="primary-button"
+                        type="button"
+                    >
+                        Share My Reading
+                    </button>
+
+                    <button
+                        id="email-button"
+                        class="secondary-button"
+                        type="button"
+                    >
+                        Prepare an Email Copy
+                    </button>
+
+                    <button
+                        id="restart-button"
+                        class="quiet-button large-quiet-button"
+                        type="button"
+                    >
+                        Take the Reading Again
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ======================================
+         FOOTER
+         ====================================== -->
+
+    <footer class="site-footer">
+
+        <div class="footer-inner">
+
+            <div>
+                <a class="footer-brand" href="#home">
+                    The Marriage Oracle
+                </a>
+
+                <p>
+                    A vintage-style, personalised entertainment experience.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <a href="#how-it-works">How it works</a>
+                <a href="#reading-includes">Reading details</a>
+                <a href="#questions">Questions</a>
+
+                <button
+                    id="footer-start-button"
+                    type="button"
+                >
+                    Begin reading
+                </button>
+            </div>
+        </div>
+
+        <div class="footer-disclosure">
+            <p>
+                <strong>Entertainment disclosure:</strong>
+                This website creates fictional, automatically generated
+                results for fun. It cannot predict future relationships,
+                marriage, identity, appearance or life events. Do not use
+                the result to make important personal decisions.
+            </p>
+
+            <p>
+                © <span id="current-year"></span>
+                The Marriage Oracle.
+            </p>
+        </div>
+    </footer>
+
+    <!-- SAVE AND EXIT POP-UP -->
+
+    <div
+        id="save-exit-dialog"
+        class="dialog-backdrop"
+        hidden
+    >
+        <div
+            class="dialog-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="save-dialog-title"
+        >
+            <h2 id="save-dialog-title">
+                Leave the reading?
+            </h2>
+
+            <p>
+                Your current answers are already saved in this browser.
+                You can return later on this device.
+            </p>
+
+            <div class="dialog-actions">
+                <button
+                    id="continue-quiz-button"
+                    class="secondary-button"
+                    type="button"
+                >
+                    Continue Reading
+                </button>
+
+                <button
+                    id="confirm-exit-button"
+                    class="primary-button"
+                    type="button"
+                >
+                    Return Home
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

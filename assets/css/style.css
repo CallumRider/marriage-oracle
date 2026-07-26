@@ -2739,3 +2739,254 @@ Second reveal: used when the £0.99 reading is unlocked.
         transition-duration: 0.15s;
     }
 }
+/* =====================================================
+   FINAL MATCHMAKER POSITIONING FIX
+   Paste this at the very bottom of style.css
+   ===================================================== */
+
+/* Keep the large Matchmaker and quotation in one central column */
+.oracle-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+/* =====================================================
+   LARGE HOMEPAGE MATCHMAKER
+   ===================================================== */
+
+.oracle-display .matchmaker-frame {
+    position: relative;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    width: min(100%, 500px);
+    height: 650px;
+    min-height: 650px;
+
+    /*
+    Extra room at the top moves his head away
+    from the decorative frame.
+    */
+    padding: 70px 10px 18px;
+
+    margin: 0 auto;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/*
+Larger figure, but moved down enough that his head
+does not touch the top of the frame.
+*/
+.oracle-display .matchmaker-image {
+    display: block;
+
+    width: 108%;
+    max-width: none;
+    height: auto;
+    max-height: 590px;
+
+    margin: 0;
+    object-fit: contain;
+    object-position: center top;
+
+    transform: translateY(32px) scale(1.07);
+    transform-origin: center top;
+
+    filter:
+        contrast(1.03)
+        saturate(0.93)
+        drop-shadow(0 15px 14px rgba(46, 27, 17, 0.2));
+}
+
+/* =====================================================
+   CENTRED QUOTATION BOX
+   ===================================================== */
+
+.oracle-display .guide-message {
+    position: relative;
+    inset: auto;
+
+    display: block;
+    align-self: center;
+
+    width: min(92%, 430px);
+    max-width: 430px;
+
+    /*
+    Positive margin means it now sits underneath
+    the frame rather than overlapping it.
+    */
+    margin: 18px auto 0;
+
+    transform: none;
+    text-align: center;
+    z-index: 5;
+}
+
+.oracle-display .guide-message p {
+    margin-inline: auto;
+    text-align: center;
+}
+
+/*
+Keep the quotation mark decorative without pulling
+the whole box to one side.
+*/
+.oracle-display .guide-message .quote-mark {
+    position: absolute;
+    top: 4px;
+    left: 16px;
+}
+
+/* =====================================================
+   QUIZ-SIDE MATCHMAKER
+   ===================================================== */
+
+.quiz-guide-panel .mini-frame {
+    position: relative;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    width: 100%;
+    height: 245px;
+    min-height: 245px;
+
+    padding: 16px 8px 0;
+    margin: 0 auto 12px;
+
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/*
+Zoom into the upper body, face, cards and watch.
+The lower fading part of the illustration is intentionally cropped.
+*/
+.quiz-guide-panel .mini-matchmaker-image {
+    display: block;
+
+    width: 128%;
+    max-width: none;
+    height: auto;
+    max-height: none;
+
+    object-fit: contain;
+    object-position: center top;
+
+    transform: translateY(18px) scale(1.08);
+    transform-origin: center top;
+
+    filter:
+        contrast(1.04)
+        saturate(0.92)
+        drop-shadow(0 8px 9px rgba(46, 27, 17, 0.19));
+}
+
+.quiz-guide-panel .guide-speech {
+    width: 100%;
+    margin: 0 auto 16px;
+    text-align: center;
+}
+
+/* =====================================================
+   TABLETS
+   ===================================================== */
+
+@media (max-width: 900px) {
+    .oracle-display .matchmaker-frame {
+        width: min(100%, 455px);
+        height: 590px;
+        min-height: 590px;
+        padding-top: 62px;
+    }
+
+    .oracle-display .matchmaker-image {
+        width: 109%;
+        max-height: 535px;
+        transform: translateY(28px) scale(1.06);
+    }
+
+    .oracle-display .guide-message {
+        margin-top: 16px;
+    }
+}
+
+/* =====================================================
+   PHONES
+   ===================================================== */
+
+@media (max-width: 600px) {
+    .oracle-display .matchmaker-frame {
+        width: min(100%, 390px);
+        height: 515px;
+        min-height: 515px;
+
+        padding: 54px 4px 12px;
+    }
+
+    .oracle-display .matchmaker-image {
+        width: 112%;
+        max-height: 465px;
+
+        transform: translateY(24px) scale(1.05);
+    }
+
+    .oracle-display .guide-message {
+        width: min(94%, 390px);
+        margin: 14px auto 0;
+    }
+
+    .quiz-guide-panel .mini-frame {
+        width: min(100%, 300px);
+        height: 225px;
+        min-height: 225px;
+
+        margin-inline: auto;
+    }
+
+    .quiz-guide-panel .mini-matchmaker-image {
+        width: 130%;
+        transform: translateY(16px) scale(1.08);
+    }
+}
+
+/* =====================================================
+   VERY SMALL PHONES
+   ===================================================== */
+
+@media (max-width: 400px) {
+    .oracle-display .matchmaker-frame {
+        height: 470px;
+        min-height: 470px;
+        padding-top: 48px;
+    }
+
+    .oracle-display .matchmaker-image {
+        width: 114%;
+        max-height: 425px;
+
+        transform: translateY(22px) scale(1.04);
+    }
+
+    .oracle-display .guide-message {
+        margin-top: 12px;
+    }
+
+    .quiz-guide-panel .mini-frame {
+        height: 210px;
+        min-height: 210px;
+    }
+
+    .quiz-guide-panel .mini-matchmaker-image {
+        width: 134%;
+        transform: translateY(14px) scale(1.06);
+    }
+}

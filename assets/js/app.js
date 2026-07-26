@@ -49,14 +49,48 @@ function upgradePageMarkup() {
     // Replace the old result silhouette with a portrait image when needed.
     const oldSilhouette = document.getElementById("companion-silhouette");
     if (oldSilhouette && !document.getElementById("companion-portrait")) {
-        const portraitWrap = document.createElement("div");
-        portraitWrap.className = "companion-portrait-wrap";
-        portraitWrap.innerHTML = `
-            <img id="companion-portrait"
-                 class="companion-portrait portrait-obscured"
-                 src=""
-                 alt="Vintage portrait selected for this companion reading">
-        `;
+       const portraitWrap = document.createElement("div");
+
+portraitWrap.id = "companion-portrait-wrap";
+portraitWrap.className =
+    "companion-portrait-wrap portrait-is-loading";
+
+portraitWrap.setAttribute("aria-busy", "true");
+
+portraitWrap.innerHTML = `
+    <div class="portrait-developing" aria-hidden="true">
+        <div class="portrait-paper-grain"></div>
+
+        <div class="portrait-ink-line portrait-ink-line-one"></div>
+        <div class="portrait-ink-line portrait-ink-line-two"></div>
+        <div class="portrait-ink-line portrait-ink-line-three"></div>
+
+        <span class="portrait-spark portrait-spark-one">✦</span>
+        <span class="portrait-spark portrait-spark-two">✧</span>
+        <span class="portrait-spark portrait-spark-three">✦</span>
+        <span class="portrait-spark portrait-spark-four">·</span>
+
+        <div class="portrait-loading-copy">
+            <span class="portrait-quill" aria-hidden="true">✒</span>
+
+            <strong id="portrait-loading-message">
+                Sketching the first lines…
+            </strong>
+        </div>
+    </div>
+
+    <img
+        id="companion-portrait"
+        class="companion-portrait portrait-obscured"
+        src=""
+        alt="Vintage portrait selected for this companion reading"
+    >
+
+    <div
+        class="portrait-reveal-flash"
+        aria-hidden="true"
+    ></div>
+`;
         oldSilhouette.replaceWith(portraitWrap);
     }
     const trustItems = document.querySelectorAll(".trust-row span");

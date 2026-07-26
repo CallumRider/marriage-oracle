@@ -2990,3 +2990,90 @@ The lower fading part of the illustration is intentionally cropped.
         transform: translateY(14px) scale(1.06);
     }
 }
+/* =====================================================
+   MATCHMAKER FINAL SIZE ADJUSTMENTS
+   Paste at the very bottom of style.css
+   ===================================================== */
+
+/* Slightly enlarge the homepage Matchmaker */
+.oracle-display .matchmaker-image {
+    width: 114%;
+    max-width: none;
+    transform: translateY(30px) scale(1.09);
+    transform-origin: center top;
+}
+
+/* Undo the excessive zoom on the quiz Matchmaker */
+.quiz-guide-panel .mini-frame {
+    height: 245px;
+    min-height: 245px;
+    padding: 14px 10px 0;
+    overflow: hidden;
+}
+
+.quiz-guide-panel .mini-matchmaker-image {
+    width: auto;
+    max-width: 96%;
+    height: auto;
+    max-height: 225px;
+
+    object-fit: contain;
+    object-position: center top;
+
+    transform: translateY(10px) scale(1);
+    transform-origin: center top;
+}
+
+/* Tablet adjustments */
+@media (max-width: 900px) {
+    .oracle-display .matchmaker-image {
+        width: 115%;
+        transform: translateY(27px) scale(1.08);
+    }
+
+    .quiz-guide-panel .mini-matchmaker-image {
+        max-width: 95%;
+        max-height: 220px;
+        transform: translateY(9px);
+    }
+}
+
+/* Phone adjustments */
+@media (max-width: 600px) {
+    .oracle-display .matchmaker-image {
+        width: 117%;
+        transform: translateY(23px) scale(1.07);
+    }
+
+    .quiz-guide-panel .mini-frame {
+        width: min(100%, 300px);
+        height: 220px;
+        min-height: 220px;
+        margin-inline: auto;
+    }
+
+    .quiz-guide-panel .mini-matchmaker-image {
+        max-width: 94%;
+        max-height: 205px;
+        transform: translateY(8px);
+    }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+    .oracle-display .matchmaker-image {
+        width: 118%;
+        transform: translateY(21px) scale(1.06);
+    }
+
+    .quiz-guide-panel .mini-frame {
+        height: 205px;
+        min-height: 205px;
+    }
+
+    .quiz-guide-panel .mini-matchmaker-image {
+        max-width: 92%;
+        max-height: 190px;
+        transform: translateY(7px);
+    }
+}

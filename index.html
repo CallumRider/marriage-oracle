@@ -651,13 +651,38 @@
 
                     <div class="silhouette-panel">
 
-                       <div class="companion-portrait-wrap">
+                       <div
+    id="companion-portrait-wrap"
+    class="companion-portrait-wrap portrait-is-loading"
+    aria-busy="true"
+>
+    <div class="portrait-developing" aria-hidden="true">
+        <div class="portrait-paper-grain"></div>
+        <div class="portrait-ink-line portrait-ink-line-one"></div>
+        <div class="portrait-ink-line portrait-ink-line-two"></div>
+        <div class="portrait-ink-line portrait-ink-line-three"></div>
+
+        <span class="portrait-spark portrait-spark-one">✦</span>
+        <span class="portrait-spark portrait-spark-two">✧</span>
+        <span class="portrait-spark portrait-spark-three">✦</span>
+        <span class="portrait-spark portrait-spark-four">·</span>
+
+        <div class="portrait-loading-copy">
+            <span class="portrait-quill" aria-hidden="true">✒</span>
+            <strong id="portrait-loading-message">
+                Sketching the first lines…
+            </strong>
+        </div>
+    </div>
+
     <img
         id="companion-portrait"
         class="companion-portrait portrait-obscured"
         src=""
         alt="Vintage portrait selected for this companion reading"
     >
+
+    <div class="portrait-reveal-flash" aria-hidden="true"></div>
 </div>
 
                         <p id="silhouette-caption">

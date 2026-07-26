@@ -454,18 +454,104 @@ function displayResult(result) {
     document.getElementById("free-relationship-style").textContent = result.relationshipStyle.title;
 
     const portrait = document.getElementById("companion-portrait");
+const portraitWrap = document.getElementById("companion-portrait-wrap");
+const portraitLoadingMessage = document.getElementById(
+    "portrait-loading-message"
+);
 
-    if (portrait) {
-        portrait.src = result.portraitPath || "";
-        portrait.alt = `Vintage companion portrait selected for ${result.generatedFor}`;
-        portrait.classList.add("portrait-obscured");
+if (portrait && portraitWrap) {
+    const portraitPath = result.portraitPath || "";
 
-        portrait.onerror = function () {
-            console.error("The companion portrait could not be loaded:", result.portraitPath);
-            document.getElementById("silhouette-caption").textContent =
-                "Portrait unavailable — please check the assets folder";
-        };
+    portraitWrap.classList.remove(
+        "portrait-is-loaded",
+        "portrait-is-revealing",
+        "portrait-is-revealed",
+        "portrait-load-failed"
+    );
+
+    portraitWrap.classList.add("portrait-is-loading");
+    portraitWrap.setAttribute("aria-busy", "true");
+
+    portrait.classList.add("portrait-obscured");
+    portrait.alt =
+        `Vintage companion portrait selected for ${result.generatedFor}`;
+
+    if (portraitLoadingMessage) {
+        portraitLoadingMessage.textContent =
+            "Sketching the first lines…";
     }
+
+    let messageStage = 0;
+
+    const loadingMessages = [
+        "Sketching the first lines…",
+        "Shading the portrait…",
+        "Developing the old photograph…",
+        "Preparing the final image…"
+    ];
+
+    const messageTimer = window.setInterval(() => {
+        messageStage =
+            (messageStage + 1) % loadingMessages.length;
+
+        if (portraitLoadingMessage) {
+            portraitLoadingMessage.textContent =
+                loadingMessages[messageStage];
+        }
+    }, 1150);
+
+    const finishPortraitLoading = () => {
+        window.clearInterval(messageTimer);
+
+        portraitWrap.classList.remove("portrait-is-loading");
+        portraitWrap.classList.add("portrait-is-loaded");
+        portraitWrap.setAttribute("aria-busy", "false");
+    };
+
+    portrait.onload = function () {
+        /*
+        Keep the animation visible briefly even when the image is
+        already cached, so the transition never feels abrupt.
+        */
+
+        window.setTimeout(finishPortraitLoading, 650);
+    };
+
+    portrait.onerror = function () {
+        window.clearInterval(messageTimer);
+
+        console.error(
+            "The companion portrait could not be loaded:",
+            portraitPath
+        );
+
+        portraitWrap.classList.remove("portrait-is-loading");
+        portraitWrap.classList.add("portrait-load-failed");
+        portraitWrap.setAttribute("aria-busy", "false");
+
+        if (portraitLoadingMessage) {
+            portraitLoadingMessage.textContent =
+                "The portrait could not be developed.";
+        }
+
+        document.getElementById(
+            "silhouette-caption"
+        ).textContent =
+            "Portrait unavailable — please check the assets folder";
+    };
+
+    /*
+    Assigning src comes after the load and error handlers.
+    This prevents a fast cached image from completing before the
+    browser has attached the handlers.
+    */
+
+    portrait.src = portraitPath;
+
+    if (portrait.complete && portrait.naturalWidth > 0) {
+        portrait.onload();
+    }
+}
 
     document.getElementById("silhouette-caption").textContent = result.silhouetteCaption;
 
@@ -495,3 +581,57 @@ function displayResult(result) {
     lockPremiumReading();
 }
 
+// =====================================================
+// PORTRAIT UNLOCK REVEAL
+// =====================================================
+
+document.addEventListener(
+    "click",
+    (event) => {
+        const clickedUnlockButton =
+            event.target.closest("#unlock-button");
+
+        if (!clickedUnlockButton) {
+            return;
+        }
+
+        const portrait =
+            document.getElementById("companion-portrait");
+
+        const portraitWrap =
+            document.getElementById("companion-portrait-wrap");
+
+        if (!portrait || !portraitWrap) {
+            return;
+        }
+
+        portraitWrap.classList.remove(
+            "portrait-is-revealing",
+            "portrait-is-revealed"
+        );
+
+        /*
+        Force the browser to recognise the reset before starting
+        the reveal again.
+        */
+
+        void portraitWrap.offsetWidth;
+
+        portraitWrap.classList.add("portrait-is-revealing");
+
+        window.setTimeout(() => {
+            portrait.classList.remove("portrait-obscured");
+        }, 180);
+
+        window.setTimeout(() => {
+            portraitWrap.classList.remove(
+                "portrait-is-revealing"
+            );
+
+            portraitWrap.classList.add(
+                "portrait-is-revealed"
+            );
+        }, 1650);
+    },
+    true
+);

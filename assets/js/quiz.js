@@ -81,23 +81,24 @@ const questions = [
         guide: "A suitable life stage can matter as much as personality."
     },
     {
-        id: "portraitBackground",
-        section: "About you",
-        type: "choice",
-        question: "Which appearance should your companion portrait reflect?",
-        help: "Choose what feels most suitable. This answer is used only for the portrait and is kept for this browser session.",
-        options: [
-            "Black",
-            "White",
-            "South Asian",
-            "East Asian",
-            "Middle Eastern or North African",
-            "Mixed or another background",
-            "No preference",
-            "Prefer not to say"
-        ],
-        guide: "The portrait should feel comfortable and appropriate to you."
-    },
+    id: "portraitBackground",
+    section: "About you",
+    type: "choice",
+    private: true,
+    question: "Which background should your companion portrait reflect?",
+    help: "Choose the portrait background you would prefer. This answer is used only to select the illustration and is kept for this browser session.",
+    options: [
+        "White",
+        "Black",
+        "Asian",
+        "Hispanic",
+        "Middle Eastern",
+        "Mixed",
+        "No preference",
+        "Prefer not to say"
+    ],
+    guide: "The portrait should reflect the preference you choose."
+},
     {
         id: "relationshipStatus",
         section: "About you",

@@ -3306,3 +3306,44 @@ textarea {
         font-size: 35px !important;
     }
 }
+/* =====================================================
+   GUIDE MESSAGE QUOTATION MARK FIX
+   ===================================================== */
+
+.oracle-display .guide-message {
+    position: relative !important;
+    padding-top: 34px !important;
+}
+
+/* Keep the quotation mark neatly inside the message box */
+.oracle-display .guide-message .quote-mark {
+    position: absolute !important;
+    top: 6px !important;
+    left: 18px !important;
+    right: auto !important;
+
+    margin: 0 !important;
+    transform: none !important;
+
+    color: var(--burgundy);
+    font-family: Georgia, serif;
+    font-size: 48px !important;
+    font-weight: 700;
+    line-height: 1 !important;
+
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+/* Slightly smaller and closer to the corner on phones */
+@media (max-width: 760px) {
+    .oracle-display .guide-message {
+        padding: 32px 20px 20px !important;
+    }
+
+    .oracle-display .guide-message .quote-mark {
+        top: 5px !important;
+        left: 14px !important;
+        font-size: 42px !important;
+    }
+}

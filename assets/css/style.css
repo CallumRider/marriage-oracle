@@ -518,51 +518,35 @@ h3 {
 
 .guide-message {
     position: relative;
-    width: min(440px, 92%);
-    margin-top: 28px;
-    padding: 36px 48px 34px;
+    width: min(420px, 92%);
+    margin-top: -22px;
+    padding: 24px 28px;
     color: #3d302a;
     background: #fff7df;
     border: 1px solid #806249;
-    box-shadow:
-        var(--shadow-small),
-        inset 0 0 0 10px rgba(111, 38, 53, 0.055);
+    box-shadow: var(--shadow-small);
     text-align: center;
 }
 
-/* Proper opening and closing quotation marks, kept inside the card. */
 .guide-message::before,
 .guide-message::after {
+    content: "";
     position: absolute;
-    z-index: 1;
-    color: var(--burgundy);
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 50px;
-    font-weight: 700;
-    line-height: 1;
-    pointer-events: none;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: rgba(111, 38, 53, 0.27);
 }
 
-.guide-message::before {
-    content: "“";
-    top: 6px;
-    left: 18px;
-}
-
-.guide-message::after {
-    content: "”";
-    right: 18px;
-    bottom: -7px;
-}
+.guide-message::before { left: 10px; }
+.guide-message::after { right: 10px; }
 
 .guide-message p {
-    position: relative;
-    z-index: 2;
     margin: 0;
     font-family: var(--serif-display);
     font-size: 23px;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.25;
 }
 
 
@@ -3309,64 +3293,142 @@ textarea {
 }
 
 /* =====================================================
-   HOMEPAGE MATCHMAKER MESSAGE — RESPONSIVE FINISHING
+   FINAL HOMEPAGE MATCHMAKER QUOTE CARD
+   Explicit quote elements are used so they cannot collide
+   with the card's decorative inset lines.
    ===================================================== */
 
 #home .oracle-display .guide-message {
-    overflow: hidden;
+    position: relative !important;
+    display: block !important;
+    width: min(94%, 460px) !important;
+    max-width: 460px !important;
+    margin: 30px auto 0 !important;
+    padding: 36px 52px 34px !important;
+    overflow: hidden !important;
+    text-align: center !important;
+    isolation: isolate;
+}
+
+/* Keep the thin burgundy inset lines as lines, not quote marks. */
+#home .oracle-display .guide-message::before,
+#home .oracle-display .guide-message::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 10px !important;
+    bottom: 10px !important;
+    width: 1px !important;
+    height: auto !important;
+    color: transparent !important;
+    background: rgba(111, 38, 53, 0.27) !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    transform: none !important;
+    pointer-events: none !important;
+}
+
+#home .oracle-display .guide-message::before {
+    left: 10px !important;
+}
+
+#home .oracle-display .guide-message::after {
+    right: 10px !important;
+    left: auto !important;
 }
 
 #home .oracle-display .guide-message > p {
-    width: 100%;
-    text-align: center;
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    text-align: center !important;
+}
+
+/* Supports both the new markup and the old single .quote-mark as a fallback. */
+#home .oracle-display .guide-message > .guide-quote,
+#home .oracle-display .guide-message > .quote-mark {
+    position: absolute !important;
+    z-index: 3 !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--burgundy) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 43px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    opacity: 0.95;
+    transform: none !important;
+    pointer-events: none !important;
+}
+
+#home .oracle-display .guide-message > .guide-quote-open,
+#home .oracle-display .guide-message > .quote-mark {
+    top: 8px !important;
+    left: 20px !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+#home .oracle-display .guide-message > .guide-quote-close {
+    right: 20px !important;
+    bottom: 2px !important;
+    top: auto !important;
+    left: auto !important;
 }
 
 @media (max-width: 760px) {
     #home .oracle-display .guide-message {
-        width: min(430px, 94%);
-        margin-top: 22px;
-        padding: 32px 38px 30px;
+        width: min(94%, 430px) !important;
+        margin-top: 26px !important;
+        padding: 33px 42px 31px !important;
     }
 
-    #home .oracle-display .guide-message::before,
-    #home .oracle-display .guide-message::after {
-        font-size: 43px;
+    #home .oracle-display .guide-message > .guide-quote,
+    #home .oracle-display .guide-message > .quote-mark {
+        font-size: 38px !important;
     }
 
-    #home .oracle-display .guide-message::before {
-        top: 6px;
-        left: 15px;
+    #home .oracle-display .guide-message > .guide-quote-open,
+    #home .oracle-display .guide-message > .quote-mark {
+        top: 7px !important;
+        left: 16px !important;
     }
 
-    #home .oracle-display .guide-message::after {
-        right: 15px;
-        bottom: -6px;
+    #home .oracle-display .guide-message > .guide-quote-close {
+        right: 16px !important;
+        bottom: 1px !important;
     }
 }
 
 @media (max-width: 390px) {
     #home .oracle-display .guide-message {
-        width: 96%;
-        margin-top: 18px;
-        padding: 29px 30px 27px;
+        width: 96% !important;
+        margin-top: 22px !important;
+        padding: 31px 35px 29px !important;
     }
 
     #home .oracle-display .guide-message > p {
-        font-size: 20px;
-        line-height: 1.35;
+        font-size: 20px !important;
+        line-height: 1.35 !important;
     }
 
-    #home .oracle-display .guide-message::before,
-    #home .oracle-display .guide-message::after {
-        font-size: 37px;
+    #home .oracle-display .guide-message > .guide-quote,
+    #home .oracle-display .guide-message > .quote-mark {
+        font-size: 34px !important;
     }
 
-    #home .oracle-display .guide-message::before {
-        left: 12px;
+    #home .oracle-display .guide-message > .guide-quote-open,
+    #home .oracle-display .guide-message > .quote-mark {
+        left: 14px !important;
     }
 
-    #home .oracle-display .guide-message::after {
-        right: 12px;
-        bottom: -4px;
+    #home .oracle-display .guide-message > .guide-quote-close {
+        right: 14px !important;
     }
 }

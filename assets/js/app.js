@@ -1,486 +1,511 @@
 "use strict";
 
-// =====================================================
-// SIMPLE SETTINGS YOU CAN CHANGE LATER
-// =====================================================
+(() => {
+    const CONFIG = Object.freeze({
+        siteName: "The Marriage Oracle",
+        priceText: "£0.99",
+        paymentLink: "",
+        demoMode: true
+    });
 
-const SITE_NAME = "The Marriage Oracle";
-const PRICE_TEXT = "£0.99";
+    const STORAGE_KEYS = Object.freeze({
+        profile: "marriageOracleProfileV2",
+        answers: "marriageOracleAnswersV2",
+        privateAnswers: "marriageOraclePrivateAnswersV2",
+        questionIndex: "marriageOracleQuestionIndexV2",
+        result: "marriageOracleResultV2",
+        awaitingPayment: "marriageOracleAwaitingPayment"
+    });
 
-// Leave blank while testing. Later, paste your Stripe Payment Link here.
-const PAYMENT_LINK = "";
+    const PRIVATE_ANSWER_IDS = new Set([
+        "beliefRole",
+        "sharedBeliefs",
+        "portraitBackground"
+    ]);
 
-// Keep true while testing. No payment is taken in demo mode.
-const DEMO_MODE = true;
+    const state = {
+        currentQuestionIndex: 0,
+        answers: {},
+        profile: { mode: "guest", name: "", email: "" },
+        finalResult: null,
+        loadingFrame: null,
+        portraitMessageTimer: null,
+        quoteTimer: null
+    };
 
-// Questions about beliefs are kept only for the current browser session.
-const PRIVATE_ANSWER_IDS = new Set(["beliefRole", "sharedBeliefs", "portraitBackground"]);
+    const elements = {};
+    const modules = {};
+    let initialised = false;
 
-
-// AUTOMATIC PAGE UPGRADE
-// This lets you replace only script.js. Your existing HTML and CSS can stay.
-// =====================================================
-
-upgradePageMarkup();
-
-function upgradePageMarkup() {
-    // Replace the old CSS-built guide with the finished artwork when needed.
-    const largeFrame = document.querySelector(".oracle-display .ornamental-frame");
-    if (largeFrame && !largeFrame.querySelector(".matchmaker-image")) {
-        largeFrame.classList.add("matchmaker-frame");
-        largeFrame.innerHTML = `
-            <img class="matchmaker-image"
-                 src="assets/images/matchmaker/matchmaker.png"
-                 alt="The Marriage Oracle's friendly Victorian matchmaker">
-            <div class="frame-stars" aria-hidden="true">✦</div>
-        `;
+    function byId(id) {
+        return document.getElementById(id);
     }
 
-    const miniFrame = document.querySelector(".quiz-guide-panel .mini-frame");
-    if (miniFrame && !miniFrame.querySelector(".mini-matchmaker-image")) {
-        miniFrame.innerHTML = `
-            <img class="mini-matchmaker-image"
-                 src="assets/images/matchmaker/matchmaker.png"
-                 alt=""
-                 aria-hidden="true">
-        `;
+    function cacheElements() {
+        Object.assign(elements, {
+            screens: {
+                home: byId("home-screen"),
+                profile: byId("profile-screen"),
+                quiz: byId("quiz-screen"),
+                loading: byId("loading-screen"),
+                result: byId("result-screen")
+            },
+            startButtons: [
+                byId("hero-start-button"),
+                byId("header-start-button"),
+                byId("bottom-start-button"),
+                byId("footer-start-button")
+            ].filter(Boolean),
+            profileForm: byId("profile-form"),
+            guestButton: byId("guest-button"),
+            profileNameInput: byId("profile-name"),
+            profileEmailInput: byId("profile-email"),
+            profileError: byId("profile-error"),
+            questionForm: byId("question-form"),
+            questionTitle: byId("question-title"),
+            questionHelp: byId("question-help"),
+            questionNumberLabel: byId("question-number-label"),
+            answerArea: byId("answer-area"),
+            questionError: byId("question-error"),
+            nextButton: byId("next-button"),
+            backButton: byId("back-button"),
+            sectionName: byId("section-name"),
+            progressCount: byId("progress-count"),
+            progressPercentage: byId("progress-percentage"),
+            progressTrack: byId("progress-track"),
+            progressBar: byId("progress-bar"),
+            guideSpeech: byId("guide-speech"),
+            savedStatus: byId("saved-status"),
+            quitQuizButton: byId("quit-quiz-button"),
+            saveExitDialog: byId("save-exit-dialog"),
+            continueQuizButton: byId("continue-quiz-button"),
+            confirmExitButton: byId("confirm-exit-button"),
+            loadingProgressBar: byId("loading-progress-bar"),
+            loadingPercentage: byId("loading-percentage"),
+            loadingMessage: byId("loading-message"),
+            analysisItems: [
+                byId("analysis-one"),
+                byId("analysis-two"),
+                byId("analysis-three"),
+                byId("analysis-four")
+            ].filter(Boolean),
+            premiumReading: byId("premium-reading"),
+            lockedOverlay: byId("locked-overlay"),
+            resultActions: byId("result-actions"),
+            unlockButton: byId("unlock-button"),
+            shareButton: byId("share-button"),
+            emailButton: byId("email-button"),
+            printButton: byId("print-button"),
+            restartButton: byId("restart-button"),
+            paymentNote: byId("payment-note"),
+            priceBadge: byId("price-badge")
+        });
     }
 
-    // Replace the old result silhouette with a portrait image when needed.
-    const oldSilhouette = document.getElementById("companion-silhouette");
-    if (oldSilhouette && !document.getElementById("companion-portrait")) {
-       const portraitWrap = document.createElement("div");
-
-portraitWrap.id = "companion-portrait-wrap";
-portraitWrap.className =
-    "companion-portrait-wrap portrait-is-loading";
-
-portraitWrap.setAttribute("aria-busy", "true");
-
-portraitWrap.innerHTML = `
-    <div class="portrait-developing" aria-hidden="true">
-        <div class="portrait-paper-grain"></div>
-
-        <div class="portrait-ink-line portrait-ink-line-one"></div>
-        <div class="portrait-ink-line portrait-ink-line-two"></div>
-        <div class="portrait-ink-line portrait-ink-line-three"></div>
-
-        <span class="portrait-spark portrait-spark-one">✦</span>
-        <span class="portrait-spark portrait-spark-two">✧</span>
-        <span class="portrait-spark portrait-spark-three">✦</span>
-        <span class="portrait-spark portrait-spark-four">·</span>
-
-        <div class="portrait-loading-copy">
-            <span class="portrait-quill" aria-hidden="true">✒</span>
-
-            <strong id="portrait-loading-message">
-                Sketching the first lines…
-            </strong>
-        </div>
-    </div>
-
-    <img
-        id="companion-portrait"
-        class="companion-portrait portrait-obscured"
-        src=""
-        alt="Vintage portrait selected for this companion reading"
-    >
-
-    <div
-        class="portrait-reveal-flash"
-        aria-hidden="true"
-    ></div>
-`;
-        oldSilhouette.replaceWith(portraitWrap);
-    }
-    const trustItems = document.querySelectorAll(".trust-row span");
-    if (trustItems[0]) trustItems[0].textContent = "33 thoughtful questions";
-
-    const statCards = document.querySelectorAll(".stat-strip article");
-    if (statCards[0]) {
-        statCards[0].querySelector("strong").textContent = "33";
-        statCards[0].querySelector("span").textContent = "Personal questions";
-    }
-    if (statCards[1]) {
-        statCards[1].querySelector("strong").textContent = "11";
-        statCards[1].querySelector("span").textContent = "Detailed result areas";
-    }
-    if (statCards[2]) {
-        statCards[2].querySelector("strong").textContent = "1,000s";
-        statCards[2].querySelector("span").textContent = "Possible reading combinations";
+    function isPlainObject(value) {
+        return Boolean(value) && typeof value === "object" && !Array.isArray(value);
     }
 
-    const bottomStart = document.getElementById("bottom-start-button");
-    if (bottomStart) bottomStart.textContent = "Start the 33-Question Reading";
-
-    const initialProgress = document.getElementById("progress-count");
-    if (initialProgress) initialProgress.textContent = "Question 1 of 33";
-
-    const profileNote = document.querySelector("#profile-screen .small-note");
-    if (profileNote) {
-        profileNote.textContent = "Questions about beliefs and portrait appearance are optional. You may choose ‘Prefer not to say’ wherever it is offered.";
+    function getStorage(storageName) {
+        try {
+            return window[storageName] ?? null;
+        } catch (error) {
+            console.warn(`${storageName} is not available in this browser context.`, error);
+            return null;
+        }
     }
 
-    const resultSummary = document.getElementById("result-summary");
-    if (resultSummary && !document.getElementById("reading-reference")) {
-        const reference = document.createElement("p");
-        reference.id = "reading-reference";
-        reference.className = "small-note";
-        reference.textContent = "Reading reference: MO-000000";
-        resultSummary.insertAdjacentElement("afterend", reference);
+    function readJSON(storageName, key, fallback) {
+        const storage = getStorage(storageName);
+        if (!storage) return fallback;
+
+        try {
+            const raw = storage.getItem(key);
+            return raw === null ? fallback : JSON.parse(raw);
+        } catch (error) {
+            console.warn(`Could not read ${key} from browser storage.`, error);
+            return fallback;
+        }
     }
 
-    const lockedHeading = document.querySelector(".locked-heading h3");
-    if (lockedHeading) lockedHeading.textContent = "Eleven detailed clues are ready";
+    function readText(storageName, key, fallback = null) {
+        const storage = getStorage(storageName);
+        if (!storage) return fallback;
 
-    const price = document.getElementById("price-badge");
-    if (price) price.textContent = PRICE_TEXT;
-
-    const premium = document.getElementById("premium-reading");
-    if (premium) {
-        premium.innerHTML = `
-            <article class="reading-card">
-                <span class="reading-icon">✒</span>
-                <div><small>Possible name</small><strong id="partner-name">Alexander</strong><p id="name-explanation">A generation-aware name clue selected from your answers.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">◷</span>
-                <div><small>Likely life stage</small><strong id="partner-age">Experienced but open to a new chapter</strong><p id="age-explanation">Shared pace and values may matter more than an exact number.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">❦</span>
-                <div><small>Personality</small><strong id="partner-personality">Kind, patient and quietly humorous</strong><p id="personality-explanation">They are likely to value consistency and genuine companionship.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">♙</span>
-                <div><small>Appearance clue</small><strong id="partner-appearance">Kind eyes and an understated style</strong><p id="appearance-explanation">Their warmth is likely to be more memorable than any single feature.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">☼</span>
-                <div><small>Values and outlook</small><strong id="partner-values">Respectful and guided by shared values</strong><p id="values-explanation">Mutual respect is likely to matter more than complete agreement.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">⌖</span>
-                <div><small>Where you may meet</small><strong id="meeting-place">Through friends or a familiar community</strong><p id="meeting-explanation">The connection may begin naturally rather than through a dramatic introduction.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">⚭</span>
-                <div><small>Relationship dynamic</small><strong id="relationship-dynamic">A steady friendship that deepens into affection</strong><p id="relationship-explanation">The relationship is likely to find a comfortable balance of closeness and independence.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">♡</span>
-                <div><small>Affection style</small><strong id="affection-style">Thoughtful words and remembered details</strong><p id="affection-explanation">Small, personal gestures may become one of the clearest signs of care.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">◷</span>
-                <div><small>Relationship timing</small><strong id="relationship-year">2029</strong><p id="timing-explanation">This indicates a period when your routine may open to a new connection.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">⌂</span>
-                <div><small>Future life</small><strong id="future-home">A comfortable home near family</strong><p id="home-explanation">Your result favours familiarity, warmth and shared traditions.</p></div>
-            </article>
-            <article class="reading-card">
-                <span class="reading-icon">✦</span>
-                <div><small>Oracle message</small><strong id="oracle-message">The strongest bond begins with trust.</strong><p id="message-explanation">Do not overlook the person who makes ordinary moments feel peaceful.</p></div>
-            </article>
-
-            <div id="locked-overlay" class="locked-overlay">
-                <span class="lock-symbol" aria-hidden="true">♜</span>
-                <h3>Your detailed reading is prepared</h3>
-                <p>Unlock the age-matched name, life-stage clue, personality, values, appearance, meeting story, relationship style, affection pattern, timing and future-life reading.</p>
-                <button id="unlock-button" class="primary-button" type="button">Preview Full Reading — ${PRICE_TEXT}</button>
-                <small id="payment-note">Demo mode is active. No payment will be taken.</small>
-            </div>
-        `;
+        try {
+            return storage.getItem(key) ?? fallback;
+        } catch (error) {
+            console.warn(`Could not read ${key} from browser storage.`, error);
+            return fallback;
+        }
     }
 
-    const actions = document.getElementById("result-actions");
-    if (actions) {
-        actions.innerHTML = `
-            <button id="share-button" class="primary-button" type="button">Share My Reading</button>
-            <button id="email-button" class="secondary-button" type="button">Prepare an Email Copy</button>
-            <button id="print-button" class="secondary-button" type="button">Print or Save as PDF</button>
-            <button id="restart-button" class="quiet-button large-quiet-button" type="button">Take the Reading Again</button>
-        `;
+    function writeJSON(storageName, key, value) {
+        const storage = getStorage(storageName);
+        if (!storage) return false;
+
+        try {
+            storage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (error) {
+            console.warn(`Could not save ${key} to browser storage.`, error);
+            return false;
+        }
     }
-}
 
+    function writeText(storageName, key, value) {
+        const storage = getStorage(storageName);
+        if (!storage) return false;
 
-// ELEMENTS
-// =====================================================
-
-const screens = {
-    home: document.getElementById("home-screen"),
-    profile: document.getElementById("profile-screen"),
-    quiz: document.getElementById("quiz-screen"),
-    loading: document.getElementById("loading-screen"),
-    result: document.getElementById("result-screen")
-};
-
-const startButtons = [
-    document.getElementById("hero-start-button"),
-    document.getElementById("header-start-button"),
-    document.getElementById("bottom-start-button"),
-    document.getElementById("footer-start-button")
-].filter(Boolean);
-
-const profileForm = document.getElementById("profile-form");
-const guestButton = document.getElementById("guest-button");
-const profileNameInput = document.getElementById("profile-name");
-const profileEmailInput = document.getElementById("profile-email");
-const profileError = document.getElementById("profile-error");
-
-const questionForm = document.getElementById("question-form");
-const questionTitle = document.getElementById("question-title");
-const questionHelp = document.getElementById("question-help");
-const questionNumberLabel = document.getElementById("question-number-label");
-const answerArea = document.getElementById("answer-area");
-const questionError = document.getElementById("question-error");
-const nextButton = document.getElementById("next-button");
-const backButton = document.getElementById("back-button");
-const sectionName = document.getElementById("section-name");
-const progressCount = document.getElementById("progress-count");
-const progressPercentage = document.getElementById("progress-percentage");
-const progressTrack = document.getElementById("progress-track");
-const progressBar = document.getElementById("progress-bar");
-const guideSpeech = document.getElementById("guide-speech");
-const savedStatus = document.getElementById("saved-status");
-
-const quitQuizButton = document.getElementById("quit-quiz-button");
-const saveExitDialog = document.getElementById("save-exit-dialog");
-const continueQuizButton = document.getElementById("continue-quiz-button");
-const confirmExitButton = document.getElementById("confirm-exit-button");
-
-const loadingProgressBar = document.getElementById("loading-progress-bar");
-const loadingPercentage = document.getElementById("loading-percentage");
-const loadingMessage = document.getElementById("loading-message");
-const analysisItems = [
-    document.getElementById("analysis-one"),
-    document.getElementById("analysis-two"),
-    document.getElementById("analysis-three"),
-    document.getElementById("analysis-four")
-];
-
-const unlockButton = document.getElementById("unlock-button");
-const premiumReading = document.getElementById("premium-reading");
-const lockedOverlay = document.getElementById("locked-overlay");
-const resultActions = document.getElementById("result-actions");
-const shareButton = document.getElementById("share-button");
-const emailButton = document.getElementById("email-button");
-const printButton = document.getElementById("print-button");
-const restartButton = document.getElementById("restart-button");
-const paymentNote = document.getElementById("payment-note");
-const priceBadge = document.getElementById("price-badge");
-
-// =====================================================
-// APP STATE
-// =====================================================
-
-let currentQuestionIndex = 0;
-let answers = {};
-let profile = { mode: "guest", name: "", email: "" };
-let finalResult = null;
-let loadingTimer = null;
-
-const STORAGE_KEYS = {
-    profile: "marriageOracleProfileV2",
-    answers: "marriageOracleAnswersV2",
-    privateAnswers: "marriageOraclePrivateAnswersV2",
-    questionIndex: "marriageOracleQuestionIndexV2",
-    result: "marriageOracleResultV2"
-};
-
-// =====================================================
-
-// SAVE AND EXIT
-// =====================================================
-
-quitQuizButton.addEventListener("click", () => {
-    saveProgress();
-    saveExitDialog.hidden = false;
-});
-
-continueQuizButton.addEventListener("click", () => {
-    saveExitDialog.hidden = true;
-});
-
-confirmExitButton.addEventListener("click", () => {
-    saveExitDialog.hidden = true;
-    showScreen("home");
-});
-
-saveExitDialog.addEventListener("click", (event) => {
-    if (event.target === saveExitDialog) {
-        saveExitDialog.hidden = true;
+        try {
+            storage.setItem(key, String(value));
+            return true;
+        } catch (error) {
+            console.warn(`Could not save ${key} to browser storage.`, error);
+            return false;
+        }
     }
-});
 
-// =====================================================
+    function removeStoredValue(storageName, key) {
+        const storage = getStorage(storageName);
+        if (!storage) return;
 
-// STORAGE
-// =====================================================
+        try {
+            storage.removeItem(key);
+        } catch (error) {
+            console.warn(`Could not remove ${key} from browser storage.`, error);
+        }
+    }
 
-function saveProgress() {
-    const normalAnswers = {};
-    const privateAnswers = {};
+    function saveProgress() {
+        const normalAnswers = {};
+        const privateAnswers = {};
 
-    Object.entries(answers).forEach(([key, value]) => {
-        if (PRIVATE_ANSWER_IDS.has(key)) {
-            privateAnswers[key] = value;
+        Object.entries(state.answers).forEach(([key, value]) => {
+            const target = PRIVATE_ANSWER_IDS.has(key)
+                ? privateAnswers
+                : normalAnswers;
+            target[key] = value;
+        });
+
+        writeJSON("localStorage", STORAGE_KEYS.answers, normalAnswers);
+        writeJSON("sessionStorage", STORAGE_KEYS.privateAnswers, privateAnswers);
+        writeText("localStorage", STORAGE_KEYS.questionIndex, state.currentQuestionIndex);
+    }
+
+    function saveProfile() {
+        if (state.profile.mode === "saved") {
+            writeJSON("localStorage", STORAGE_KEYS.profile, state.profile);
         } else {
-            normalAnswers[key] = value;
+            removeStoredValue("localStorage", STORAGE_KEYS.profile);
         }
-    });
-
-    localStorage.setItem(STORAGE_KEYS.answers, JSON.stringify(normalAnswers));
-    sessionStorage.setItem(STORAGE_KEYS.privateAnswers, JSON.stringify(privateAnswers));
-    localStorage.setItem(STORAGE_KEYS.questionIndex, String(currentQuestionIndex));
-}
-
-function restoreSavedProfile() {
-    try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.profile));
-
-        if (saved && typeof saved === "object") {
-            profile = {
-                mode: saved.mode === "saved" ? "saved" : "guest",
-                name: typeof saved.name === "string" ? saved.name : "",
-                email: typeof saved.email === "string" ? saved.email : ""
-            };
-        }
-    } catch (error) {
-        localStorage.removeItem(STORAGE_KEYS.profile);
-    }
-}
-
-function restoreSavedProgress() {
-    try {
-        const savedAnswers = JSON.parse(localStorage.getItem(STORAGE_KEYS.answers)) || {};
-        const privateAnswers = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.privateAnswers)) || {};
-        const savedIndex = Number(localStorage.getItem(STORAGE_KEYS.questionIndex));
-
-        if (typeof savedAnswers === "object" && typeof privateAnswers === "object") {
-            answers = { ...savedAnswers, ...privateAnswers };
-        }
-
-        if (Number.isInteger(savedIndex) && savedIndex >= 0 && savedIndex < questions.length) {
-            currentQuestionIndex = savedIndex;
-        }
-    } catch (error) {
-        clearQuizProgress();
-    }
-}
-
-function clearQuizProgress() {
-    localStorage.removeItem(STORAGE_KEYS.answers);
-    sessionStorage.removeItem(STORAGE_KEYS.privateAnswers);
-    localStorage.removeItem(STORAGE_KEYS.questionIndex);
-    localStorage.removeItem(STORAGE_KEYS.result);
-}
-
-// =====================================================
-// HELPERS
-// =====================================================
-
-function showScreen(screenName) {
-    Object.entries(screens).forEach(([name, element]) => {
-        element.hidden = name !== screenName;
-    });
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function createSeed(value) {
-    const text = typeof value === "string" ? value : JSON.stringify(value);
-    let hash = 2166136261;
-
-    for (let index = 0; index < text.length; index += 1) {
-        hash ^= text.charCodeAt(index);
-        hash = Math.imul(hash, 16777619);
     }
 
-    return Math.abs(hash >>> 0);
-}
+    function saveResult(result) {
+        state.finalResult = result;
+        writeJSON("localStorage", STORAGE_KEYS.result, result);
+    }
 
-function choose(list, seed, offset = 0) {
-    return list[(seed + offset) % list.length];
-}
+    function restoreSavedProfile() {
+        const saved = readJSON("localStorage", STORAGE_KEYS.profile, null);
 
-function capitalise(value) {
-    return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function toRoman(number) {
-    const numerals = [[10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
-    let remaining = number;
-    let result = "";
-
-    numerals.forEach(([value, symbol]) => {
-        while (remaining >= value) {
-            result += symbol;
-            remaining -= value;
+        if (!isPlainObject(saved)) {
+            return;
         }
-    });
 
-    return result;
-}
+        state.profile = {
+            mode: saved.mode === "saved" ? "saved" : "guest",
+            name: typeof saved.name === "string" ? saved.name : "",
+            email: typeof saved.email === "string" ? saved.email : ""
+        };
+    }
 
-function rotateHomeGuideMessage() {
-    const messages = [
-        "The smallest choices often reveal the greatest clues.",
-        "A lasting bond is often hidden inside ordinary preferences.",
-        "Your answers tell a story long before the final card is turned.",
-        "Choose honestly. The most convincing reading begins there.",
-        "Thirty-three small decisions can create thousands of possible readings."
-    ];
+    function restoreSavedProgress() {
+        const savedAnswers = readJSON("localStorage", STORAGE_KEYS.answers, {});
+        const privateAnswers = readJSON(
+            "sessionStorage",
+            STORAGE_KEYS.privateAnswers,
+            {}
+        );
 
-    const messageElement = document.getElementById("home-guide-message");
-    let index = 0;
+        state.answers = {
+            ...(isPlainObject(savedAnswers) ? savedAnswers : {}),
+            ...(isPlainObject(privateAnswers) ? privateAnswers : {})
+        };
 
-    setInterval(() => {
-        index = (index + 1) % messages.length;
-        messageElement.textContent = messages[index];
-    }, 6000);
-}
+        const savedIndex = Number(
+            readText("localStorage", STORAGE_KEYS.questionIndex, "0")
+        );
 
+        const questionCount = modules.quiz?.questions?.length ?? 0;
+        state.currentQuestionIndex = Number.isInteger(savedIndex)
+            && savedIndex >= 0
+            && savedIndex < questionCount
+            ? savedIndex
+            : 0;
 
+        const savedResult = readJSON("localStorage", STORAGE_KEYS.result, null);
+        state.finalResult = isPlainObject(savedResult) ? savedResult : null;
+    }
 
-// Handy testing command: type resetMarriageOracle() in the browser console.
-window.resetMarriageOracle = function resetMarriageOracle() {
-    Object.values(STORAGE_KEYS).forEach((key) => {
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
-    });
-    sessionStorage.removeItem("marriageOracleAwaitingPayment");
-    location.reload();
-};
+    function clearQuizProgress() {
+        removeStoredValue("localStorage", STORAGE_KEYS.answers);
+        removeStoredValue("sessionStorage", STORAGE_KEYS.privateAnswers);
+        removeStoredValue("localStorage", STORAGE_KEYS.questionIndex);
+        removeStoredValue("localStorage", STORAGE_KEYS.result);
+        removeStoredValue("sessionStorage", STORAGE_KEYS.awaitingPayment);
 
-// =====================================================
-// STARTUP
-// Called only after every split script has loaded.
-// =====================================================
+        state.currentQuestionIndex = 0;
+        state.answers = {};
+        state.finalResult = null;
+    }
 
-function initialiseApp() {
-    document.getElementById("current-year").textContent = new Date().getFullYear();
-    priceBadge.textContent = PRICE_TEXT;
+    function showScreen(screenName) {
+        const target = elements.screens?.[screenName];
 
-    unlockButton.textContent = DEMO_MODE
-        ? `Preview Full Reading — ${PRICE_TEXT}`
-        : `Unlock Full Reading — ${PRICE_TEXT}`;
+        if (!target) {
+            console.error(`Unknown screen: ${screenName}`);
+            return;
+        }
 
-    paymentNote.textContent = DEMO_MODE
-        ? "Testing mode is active. No payment will be taken."
-        : "You will be sent to our secure payment page.";
+        Object.entries(elements.screens).forEach(([name, element]) => {
+            if (element) {
+                element.hidden = name !== screenName;
+            }
+        });
 
-    restoreSavedProfile();
-    restoreSavedProgress();
-    rotateHomeGuideMessage();
+        window.scrollTo({
+            top: 0,
+            behavior: prefersReducedMotion() ? "auto" : "smooth"
+        });
+    }
 
-    startButtons.forEach((button) => {
-        button.addEventListener("click", openProfileScreen);
-    });
+    function createSeed(value) {
+        const text = typeof value === "string" ? value : JSON.stringify(value);
+        let hash = 2166136261;
 
-    document.querySelectorAll("[data-go-home]").forEach((button) => {
-        button.addEventListener("click", () => showScreen("home"));
-    });
-}
+        for (let index = 0; index < text.length; index += 1) {
+            hash ^= text.charCodeAt(index);
+            hash = Math.imul(hash, 16777619);
+        }
+
+        return hash >>> 0;
+    }
+
+    function choose(list, seed, offset = 0) {
+        if (!Array.isArray(list) || list.length === 0) {
+            return undefined;
+        }
+
+        const index = Math.abs((Number(seed) || 0) + offset) % list.length;
+        return list[index];
+    }
+
+    function capitalise(value) {
+        const text = String(value ?? "");
+        return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+    }
+
+    function toRoman(number) {
+        const numerals = [
+            [10, "X"],
+            [9, "IX"],
+            [5, "V"],
+            [4, "IV"],
+            [1, "I"]
+        ];
+        let remaining = Math.max(0, Math.floor(Number(number) || 0));
+        let result = "";
+
+        numerals.forEach(([value, symbol]) => {
+            while (remaining >= value) {
+                result += symbol;
+                remaining -= value;
+            }
+        });
+
+        return result;
+    }
+
+    function prefersReducedMotion() {
+        return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    }
+
+    function startHomeQuoteRotation() {
+        const messageElement = byId("home-guide-message");
+        if (!messageElement || prefersReducedMotion()) {
+            return;
+        }
+
+        const messages = [
+            "The smallest choices often reveal the greatest clues.",
+            "A lasting bond is often hidden inside ordinary preferences.",
+            "Your answers tell a story long before the final card is turned.",
+            "Choose honestly. The most convincing reading begins there.",
+            "Thirty-three small decisions can create thousands of possible readings."
+        ];
+        let index = 0;
+
+        window.clearInterval(state.quoteTimer);
+        state.quoteTimer = window.setInterval(() => {
+            index = (index + 1) % messages.length;
+            messageElement.textContent = messages[index];
+        }, 6000);
+    }
+
+    function openSaveDialog() {
+        saveProgress();
+        if (elements.saveExitDialog) {
+            elements.saveExitDialog.hidden = false;
+            elements.continueQuizButton?.focus();
+        }
+    }
+
+    function closeSaveDialog() {
+        if (elements.saveExitDialog) {
+            elements.saveExitDialog.hidden = true;
+        }
+    }
+
+    function bindCoreEvents() {
+        elements.quitQuizButton?.addEventListener("click", openSaveDialog);
+        elements.continueQuizButton?.addEventListener("click", closeSaveDialog);
+
+        elements.confirmExitButton?.addEventListener("click", () => {
+            closeSaveDialog();
+            showScreen("home");
+        });
+
+        elements.saveExitDialog?.addEventListener("click", (event) => {
+            if (event.target === elements.saveExitDialog) {
+                closeSaveDialog();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !elements.saveExitDialog?.hidden) {
+                closeSaveDialog();
+            }
+        });
+
+        document.querySelectorAll("[data-go-home]").forEach((button) => {
+            button.addEventListener("click", () => showScreen("home"));
+        });
+    }
+
+    function configureStaticText() {
+        const currentYear = byId("current-year");
+        if (currentYear) {
+            currentYear.textContent = String(new Date().getFullYear());
+        }
+
+        if (elements.priceBadge) {
+            elements.priceBadge.textContent = CONFIG.priceText;
+        }
+
+        if (elements.unlockButton) {
+            elements.unlockButton.textContent = CONFIG.demoMode
+                ? `Preview Full Reading — ${CONFIG.priceText}`
+                : `Unlock Full Reading — ${CONFIG.priceText}`;
+        }
+
+        if (elements.paymentNote) {
+            elements.paymentNote.textContent = CONFIG.demoMode
+                ? "Testing mode is active. No payment will be taken."
+                : "You will be sent to our secure payment page.";
+        }
+    }
+
+    function validateMarkup() {
+        const required = [
+            "home-screen",
+            "profile-screen",
+            "quiz-screen",
+            "loading-screen",
+            "result-screen",
+            "question-form",
+            "premium-reading",
+            "unlock-button"
+        ];
+        const missing = required.filter((id) => !byId(id));
+
+        if (missing.length > 0) {
+            console.error(
+                "The Marriage Oracle could not start because these elements are missing:",
+                missing.join(", ")
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    function init() {
+        if (initialised) {
+            return;
+        }
+
+        initialised = true;
+        cacheElements();
+
+        if (!validateMarkup()) {
+            return;
+        }
+
+        configureStaticText();
+        restoreSavedProfile();
+        restoreSavedProgress();
+        bindCoreEvents();
+
+        modules.auth?.init?.();
+        modules.quiz?.init?.();
+        modules.results?.init?.();
+        modules.payments?.init?.();
+
+        startHomeQuoteRotation();
+    }
+
+    function reset() {
+        Object.values(STORAGE_KEYS).forEach((key) => {
+            removeStoredValue("localStorage", key);
+            removeStoredValue("sessionStorage", key);
+        });
+        window.location.reload();
+    }
+
+    window.MarriageOracle = {
+        config: CONFIG,
+        storageKeys: STORAGE_KEYS,
+        privateAnswerIds: PRIVATE_ANSWER_IDS,
+        state,
+        elements,
+        modules,
+        utils: {
+            createSeed,
+            choose,
+            capitalise,
+            toRoman,
+            prefersReducedMotion
+        },
+        storage: {
+            getStorage,
+            readJSON,
+            readText,
+            writeJSON,
+            writeText,
+            removeStoredValue
+        },
+        init,
+        showScreen,
+        saveProgress,
+        saveProfile,
+        saveResult,
+        restoreSavedProfile,
+        restoreSavedProgress,
+        clearQuizProgress,
+        reset
+    };
+
+    window.resetMarriageOracle = reset;
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+})();

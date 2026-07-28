@@ -1,8 +1,8 @@
 "use strict";
 
-// =====================================================
-// AGE-AWARE NAME POOLS
-// =====================================================
+(() => {
+    const App = window.MarriageOracle;
+    if (!App) throw new Error("app.js must load before portraits.js");
 
 const namePools = {
     "18 to 24": {
@@ -263,170 +263,87 @@ const oracleMessages = {
     ]
 };
 
-// =====================================================
-// COMPLETED COMPANION PORTRAIT GALLERY
-// =====================================================
+    const PORTRAIT_BACKGROUNDS = Object.freeze([
+        "white",
+        "black",
+        "asian",
+        "hispanic",
+        "middle eastern",
+        "mixed"
+    ]);
 
-/*
-Folder structure:
+    const GENDER_FOLDERS = Object.freeze({
+        man: "men",
+        woman: "women",
+        neutral: "neutral"
+    });
 
-assets/images/companions/
-├── men/
-├── women/
-└── neutral/
+    const FILENAME_PREFIXES = Object.freeze({
+        man: "man",
+        woman: "woman",
+        neutral: "neutral"
+    });
 
-Every gender folder contains:
-
-18-29
-45-59
-60-74
-
-Every age folder contains:
-
-white
-black
-asian
-hispanic
-middle eastern
-mixed
-
-The folder is called "middle eastern" with a space.
-The image filename uses "middle-eastern" with a hyphen.
-*/
-
-const PORTRAIT_ETHNICITIES = [
-    "white",
-    "black",
-    "asian",
-    "hispanic",
-    "middle eastern",
-    "mixed"
-];
-
-const PORTRAIT_GENDER_FOLDERS = {
-    man: "men",
-    woman: "women",
-    neutral: "neutral"
-};
-
-const PORTRAIT_FILENAME_PREFIXES = {
-    man: "man",
-    woman: "woman",
-    neutral: "neutral"
-};
-
-// =====================================================
-// AGE MATCHING
-// =====================================================
-
-function portraitAgeFolder(partnerAgeKey) {
-    if (
-        partnerAgeKey === "18 to 24" ||
-        partnerAgeKey === "25 to 34"
-    ) {
-        return "18-29";
-    }
-
-    if (
-        partnerAgeKey === "35 to 44" ||
-        partnerAgeKey === "45 to 54"
-    ) {
-        return "45-59";
-    }
-
-    /*
-    The gallery's oldest available group is 60-74.
-
-    These quiz answers therefore use that folder:
-    - 55 to 64
-    - 65 to 74
-    - 75 or older
-    - any missing or unexpected age answer
-    */
-
-    return "60-74";
-}
-
-// =====================================================
-// ETHNICITY MATCHING
-// =====================================================
-
-function portraitBackgroundKey(answer, seed) {
-    const backgroundMap = {
-        "White": "white",
-        "Black": "black",
-        "Asian": "asian",
-        "Hispanic": "hispanic",
+    const BACKGROUND_MAP = Object.freeze({
+        White: "white",
+        Black: "black",
+        Asian: "asian",
+        Hispanic: "hispanic",
         "Middle Eastern": "middle eastern",
-        "Mixed": "mixed",
-
-        /*
-        These older values remain supported so saved quiz progress
-        from the previous version does not break.
-        */
-
+        Mixed: "mixed",
         "South Asian": "asian",
         "East Asian": "asian",
         "Middle Eastern or North African": "middle eastern",
         "Mixed or another background": "mixed"
-    };
+    });
 
-    if (backgroundMap[answer]) {
-        return backgroundMap[answer];
+    function portraitAgeFolder(partnerAgeKey) {
+        if (["18 to 24", "25 to 34"].includes(partnerAgeKey)) {
+            return "18-29";
+        }
+
+        if (["35 to 44", "45 to 54"].includes(partnerAgeKey)) {
+            return "45-59";
+        }
+
+        return "60-74";
     }
 
-    /*
-    No preference, Prefer not to say or a missing answer receives
-    a consistent category based on the quiz result seed.
+    function portraitBackgroundKey(answer, seed) {
+        return BACKGROUND_MAP[answer]
+            || App.utils.choose(PORTRAIT_BACKGROUNDS, seed, 89)
+            || "mixed";
+    }
 
-    The same completed quiz will therefore continue showing the
-    same portrait after the page is refreshed.
-    */
+    function getCompanionPortraitPath(result, backgroundAnswer) {
+        const genderKey = GENDER_FOLDERS[result?.genderKey]
+            ? result.genderKey
+            : "neutral";
+        const ageFolder = portraitAgeFolder(result?.partnerAgeKey);
+        const backgroundFolder = portraitBackgroundKey(
+            backgroundAnswer,
+            result?.seed
+        );
+        const filenameBackground = backgroundFolder.replace(/\s+/g, "-");
+        const filename = `${FILENAME_PREFIXES[genderKey]}-${ageFolder}-${filenameBackground}-01.png`;
 
-    return choose(PORTRAIT_ETHNICITIES, seed, 89);
-}
+        return [
+            "assets/images/companions",
+            GENDER_FOLDERS[genderKey],
+            ageFolder,
+            backgroundFolder,
+            filename
+        ].join("/");
+    }
 
-// =====================================================
-// BUILD THE EXACT IMAGE PATH
-// =====================================================
-
-function getCompanionPortraitPath(result) {
-    const genderKey = PORTRAIT_GENDER_FOLDERS[result.genderKey]
-        ? result.genderKey
-        : "neutral";
-
-    const ageFolder = portraitAgeFolder(result.partnerAgeKey);
-
-    const ethnicityFolder = portraitBackgroundKey(
-        answers.portraitBackground,
-        result.seed
-    );
-
-    const genderFolder =
-        PORTRAIT_GENDER_FOLDERS[genderKey];
-
-    const filenamePrefix =
-        PORTRAIT_FILENAME_PREFIXES[genderKey];
-
-    /*
-    Folder:
-    middle eastern
-
-    Filename:
-    middle-eastern
-    */
-
-    const filenameEthnicity =
-        ethnicityFolder.replace(/\s+/g, "-");
-
-    const filename =
-        `${filenamePrefix}-${ageFolder}-${filenameEthnicity}-01.png`;
-
-    return [
-        "assets/images/companions",
-        genderFolder,
-        ageFolder,
-        ethnicityFolder,
-        filename
-    ].join("/");
-}
+    App.modules.portraits = {
+        data: {
+            namePools,
+            temperamentResults,
+            oracleMessages
+        },
+        portraitAgeFolder,
+        portraitBackgroundKey,
+        getCompanionPortraitPath
+    };
+})();

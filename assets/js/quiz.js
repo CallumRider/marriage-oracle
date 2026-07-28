@@ -1,8 +1,8 @@
 "use strict";
 
-// =====================================================
-// QUIZ QUESTIONS
-// =====================================================
+(() => {
+    const App = window.MarriageOracle;
+    if (!App) throw new Error("app.js must load before quiz.js");
 
 const questions = [
     {
@@ -512,203 +512,264 @@ const questions = [
     }
 ];
 
-// QUIZ RENDERING
-// =====================================================
+    let initialised = false;
 
-function renderQuestion() {
-    const question = questions[currentQuestionIndex];
-    const questionNumber = currentQuestionIndex + 1;
-    const progress = Math.round((questionNumber / questions.length) * 100);
+    function init() {
+        if (initialised) return;
+        initialised = true;
 
-    questionError.hidden = true;
-    questionTitle.textContent = question.question;
-    questionHelp.textContent = question.help || "";
-    questionNumberLabel.textContent = `Question ${toRoman(questionNumber)}`;
-    sectionName.textContent = question.section;
-    progressCount.textContent = `Question ${questionNumber} of ${questions.length}`;
-    progressPercentage.textContent = `${progress}% complete`;
-    progressBar.style.width = `${progress}%`;
-    progressTrack.setAttribute("aria-valuenow", String(progress));
-    guideSpeech.textContent = question.guide || "Consider your answer carefully.";
-    savedStatus.textContent = question.private
-        ? "This answer is kept only for this session"
-        : profile.mode === "saved"
-            ? `Saved for ${profile.name}`
-            : "Answers save on this device";
-
-    answerArea.innerHTML = "";
-
-    if (question.type === "choice") {
-        renderChoiceQuestion(question);
-    } else if (question.type === "number") {
-        renderNumberQuestion(question);
-    } else {
-        renderTextQuestion(question);
+        App.elements.questionForm?.addEventListener("submit", handleSubmit);
+        App.elements.backButton?.addEventListener("click", handleBack);
     }
 
-    backButton.hidden = currentQuestionIndex === 0;
-    nextButton.textContent = currentQuestionIndex === questions.length - 1
-        ? "Prepare My Reading →"
-        : "Continue →";
+    function renderQuestion() {
+        const question = questions[App.state.currentQuestionIndex];
+        if (!question) {
+            App.state.currentQuestionIndex = 0;
+            return renderQuestion();
+        }
 
-    saveProgress();
+        const elements = App.elements;
+        const questionNumber = App.state.currentQuestionIndex + 1;
+        const progress = Math.round((questionNumber / questions.length) * 100);
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
+        hideQuestionError();
+        elements.questionTitle.textContent = question.question;
+        elements.questionHelp.textContent = question.help || "";
+        elements.questionHelp.hidden = !question.help;
+        elements.questionNumberLabel.textContent = `Question ${App.utils.toRoman(questionNumber)}`;
+        elements.sectionName.textContent = question.section;
+        elements.progressCount.textContent = `Question ${questionNumber} of ${questions.length}`;
+        elements.progressPercentage.textContent = `${progress}% complete`;
+        elements.progressBar.style.width = `${progress}%`;
+        elements.progressTrack.setAttribute("aria-valuenow", String(progress));
+        elements.guideSpeech.textContent = question.guide || "Consider your answer carefully.";
+        elements.savedStatus.textContent = question.private
+            ? "This answer is kept only for this session"
+            : App.state.profile.mode === "saved"
+                ? `Saved for ${App.state.profile.name}`
+                : "Answers save on this device";
 
-function renderChoiceQuestion(question) {
-    question.options.forEach((option, index) => {
-        const label = document.createElement("label");
-        label.className = "answer-label";
+        elements.answerArea.replaceChildren();
 
-        const radio = document.createElement("input");
-        radio.type = "radio";
-        radio.name = "quiz-answer";
-        radio.value = option;
-        radio.id = `answer-${index}`;
-        radio.className = "answer-radio";
-        radio.checked = answers[question.id] === option;
+        if (question.type === "choice") {
+            renderChoiceQuestion(question);
+        } else if (question.type === "number") {
+            renderNumberQuestion(question);
+        } else {
+            renderTextQuestion(question);
+        }
 
-        const visibleButton = document.createElement("span");
-        visibleButton.className = "answer-button";
-        visibleButton.textContent = option;
+        elements.backButton.hidden = App.state.currentQuestionIndex === 0;
+        elements.nextButton.textContent = App.state.currentQuestionIndex === questions.length - 1
+            ? "Prepare My Reading →"
+            : "Continue →";
 
-        label.appendChild(radio);
-        label.appendChild(visibleButton);
-        answerArea.appendChild(label);
-    });
-}
-
-function renderTextQuestion(question) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "input-wrapper";
-
-    const input = document.createElement("input");
-    input.id = "current-text-answer";
-    input.className = "text-input";
-    input.type = "text";
-    input.maxLength = 30;
-    input.autocomplete = question.id === "firstName" ? "given-name" : "off";
-    input.placeholder = question.placeholder || "Type your answer";
-    input.value = answers[question.id] || (question.id === "firstName" ? profile.name : "");
-
-    const note = document.createElement("p");
-    note.className = "input-note";
-    note.textContent = "Please do not enter private information beyond what the question asks.";
-
-    wrapper.appendChild(input);
-    wrapper.appendChild(note);
-    answerArea.appendChild(wrapper);
-
-    setTimeout(() => input.focus(), 100);
-}
-
-function renderNumberQuestion(question) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "input-wrapper";
-
-    const input = document.createElement("input");
-    input.id = "current-number-answer";
-    input.className = "number-input";
-    input.type = "number";
-    input.inputMode = "numeric";
-    input.min = String(question.min ?? 0);
-    input.max = String(question.max ?? 9999);
-    input.step = "1";
-    input.placeholder = question.placeholder || "Enter a number";
-    input.value = answers[question.id] ?? "";
-
-    const note = document.createElement("p");
-    note.className = "input-note";
-    note.textContent = `Choose any whole number from ${question.min ?? 0} to ${question.max ?? 9999}.`;
-
-    wrapper.appendChild(input);
-    wrapper.appendChild(note);
-    answerArea.appendChild(wrapper);
-
-    setTimeout(() => input.focus(), 100);
-}
-
-questionForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const question = questions[currentQuestionIndex];
-    const value = readCurrentAnswer(question);
-
-    if (value === null || value === "") {
-        showQuestionError(
-            question.type === "choice"
-                ? "Please choose one of the answers before continuing."
-                : "Please enter an answer before continuing."
-        );
-        return;
+        App.saveProgress();
+        window.scrollTo({
+            top: 0,
+            behavior: App.utils.prefersReducedMotion() ? "auto" : "smooth"
+        });
     }
 
-    if (question.type === "number") {
-        const numericValue = Number(value);
-        const min = question.min ?? 0;
-        const max = question.max ?? 9999;
+    function renderChoiceQuestion(question) {
+        question.options.forEach((option, index) => {
+            const label = document.createElement("label");
+            label.className = "answer-label";
 
-        if (!Number.isInteger(numericValue) || numericValue < min || numericValue > max) {
-            showQuestionError(`Please enter a whole number from ${min} to ${max}.`);
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = "quiz-answer";
+            radio.value = option;
+            radio.id = `answer-${App.state.currentQuestionIndex}-${index}`;
+            radio.className = "answer-radio";
+            radio.checked = App.state.answers[question.id] === option;
+            radio.addEventListener("change", hideQuestionError);
+
+            const visibleButton = document.createElement("span");
+            visibleButton.className = "answer-button";
+            visibleButton.textContent = option;
+
+            label.append(radio, visibleButton);
+            App.elements.answerArea.appendChild(label);
+        });
+    }
+
+    function renderTextQuestion(question) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "input-wrapper";
+
+        const input = document.createElement("input");
+        input.id = "current-text-answer";
+        input.className = "text-input";
+        input.type = "text";
+        input.maxLength = 30;
+        input.autocomplete = question.id === "firstName" ? "given-name" : "off";
+        input.placeholder = question.placeholder || "Type your answer";
+        input.value = App.state.answers[question.id]
+            || (question.id === "firstName" ? App.state.profile.name : "");
+        input.addEventListener("input", hideQuestionError);
+
+        const note = document.createElement("p");
+        note.className = "input-note";
+        note.textContent = "Please do not enter private information beyond what the question asks.";
+
+        wrapper.append(input, note);
+        App.elements.answerArea.appendChild(wrapper);
+        focusSoon(input);
+    }
+
+    function renderNumberQuestion(question) {
+        const minimum = question.min ?? 0;
+        const maximum = question.max ?? 9999;
+        const wrapper = document.createElement("div");
+        wrapper.className = "input-wrapper";
+
+        const input = document.createElement("input");
+        input.id = "current-number-answer";
+        input.className = "number-input";
+        input.type = "number";
+        input.inputMode = "numeric";
+        input.min = String(minimum);
+        input.max = String(maximum);
+        input.step = "1";
+        input.placeholder = question.placeholder || "Enter a number";
+        input.value = App.state.answers[question.id] ?? "";
+        input.addEventListener("input", hideQuestionError);
+
+        const note = document.createElement("p");
+        note.className = "input-note";
+        note.textContent = `Choose any whole number from ${minimum} to ${maximum}.`;
+
+        wrapper.append(input, note);
+        App.elements.answerArea.appendChild(wrapper);
+        focusSoon(input);
+    }
+
+    function focusSoon(input) {
+        window.setTimeout(() => input.focus({ preventScroll: true }), 80);
+    }
+
+    function handleSubmit(event) {
+        event.preventDefault();
+
+        const question = questions[App.state.currentQuestionIndex];
+        const rawValue = readCurrentAnswer(question);
+        const validationError = validateAnswer(question, rawValue);
+
+        if (validationError) {
+            showQuestionError(validationError);
             return;
+        }
+
+        const value = normaliseAnswer(question, rawValue);
+        App.state.answers[question.id] = value;
+
+        if (question.id === "firstName" && App.state.profile.mode === "saved") {
+            App.state.profile.name = value;
+            App.saveProfile();
+        }
+
+        App.saveProgress();
+
+        if (App.state.currentQuestionIndex < questions.length - 1) {
+            App.state.currentQuestionIndex += 1;
+            renderQuestion();
+            return;
+        }
+
+        App.modules.results.startReadingAnalysis();
+    }
+
+    function handleBack() {
+        if (App.state.currentQuestionIndex <= 0) return;
+
+        const question = questions[App.state.currentQuestionIndex];
+        const rawValue = readCurrentAnswer(question);
+
+        if (rawValue !== null && rawValue !== "") {
+            const error = validateAnswer(question, rawValue);
+            if (!error) {
+                App.state.answers[question.id] = normaliseAnswer(question, rawValue);
+            }
+        }
+
+        App.state.currentQuestionIndex -= 1;
+        App.saveProgress();
+        renderQuestion();
+    }
+
+    function readCurrentAnswer(question) {
+        if (question.type === "choice") {
+            return document.querySelector('input[name="quiz-answer"]:checked')?.value ?? null;
+        }
+
+        const inputId = question.type === "number"
+            ? "current-number-answer"
+            : "current-text-answer";
+        return document.getElementById(inputId)?.value.trim() ?? null;
+    }
+
+    function validateAnswer(question, value) {
+        if (value === null || value === "") {
+            return question.type === "choice"
+                ? "Please choose one of the answers before continuing."
+                : "Please enter an answer before continuing.";
+        }
+
+        if (question.type === "choice" && !question.options.includes(value)) {
+            return "Please choose one of the available answers.";
+        }
+
+        if (question.type === "number") {
+            const numericValue = Number(value);
+            const minimum = question.min ?? 0;
+            const maximum = question.max ?? 9999;
+
+            if (!Number.isInteger(numericValue) || numericValue < minimum || numericValue > maximum) {
+                return `Please enter a whole number from ${minimum} to ${maximum}.`;
+            }
+        }
+
+        if (question.id === "firstName" && !App.modules.auth.cleanName(String(value))) {
+            return "Please enter a valid first name.";
+        }
+
+        return "";
+    }
+
+    function normaliseAnswer(question, value) {
+        if (question.id === "firstName") {
+            return App.modules.auth.cleanName(String(value));
+        }
+
+        if (question.type === "number") {
+            return Number(value);
+        }
+
+        return String(value).trim();
+    }
+
+    function showQuestionError(message) {
+        App.elements.questionError.textContent = message;
+        App.elements.questionError.hidden = false;
+        App.elements.questionError.scrollIntoView({
+            behavior: App.utils.prefersReducedMotion() ? "auto" : "smooth",
+            block: "center"
+        });
+    }
+
+    function hideQuestionError() {
+        if (App.elements.questionError) {
+            App.elements.questionError.hidden = true;
+            App.elements.questionError.textContent = "";
         }
     }
 
-    answers[question.id] = question.id === "firstName"
-        ? cleanName(String(value))
-        : value;
-
-    if (question.id === "firstName" && profile.mode === "saved") {
-        profile.name = answers.firstName;
-        localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
-    }
-
-    saveProgress();
-
-    if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex += 1;
-        renderQuestion();
-    } else {
-        startReadingAnalysis();
-    }
-});
-
-backButton.addEventListener("click", () => {
-    if (currentQuestionIndex <= 0) {
-        return;
-    }
-
-    const question = questions[currentQuestionIndex];
-    const currentValue = readCurrentAnswer(question);
-
-    if (currentValue !== null && currentValue !== "") {
-        answers[question.id] = currentValue;
-    }
-
-    currentQuestionIndex -= 1;
-    renderQuestion();
-});
-
-function readCurrentAnswer(question) {
-    if (question.type === "choice") {
-        const selected = document.querySelector('input[name="quiz-answer"]:checked');
-        return selected ? selected.value : null;
-    }
-
-    if (question.type === "number") {
-        const input = document.getElementById("current-number-answer");
-        return input ? input.value.trim() : null;
-    }
-
-    const input = document.getElementById("current-text-answer");
-    return input ? input.value.trim() : null;
-}
-
-function showQuestionError(message) {
-    questionError.textContent = message;
-    questionError.hidden = false;
-    questionError.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-// =====================================================
+    App.modules.quiz = {
+        questions,
+        init,
+        renderQuestion,
+        readCurrentAnswer
+    };
+})();

@@ -1,76 +1,95 @@
 "use strict";
 
-// LOADING AND RESULT GENERATION
-// =====================================================
+(() => {
+    const App = window.MarriageOracle;
+    if (!App) throw new Error("app.js must load before results.js");
 
-function startReadingAnalysis() {
-    showScreen("loading");
+    const Portraits = App.modules.portraits;
+    let initialised = false;
 
-    loadingProgressBar.style.width = "0%";
-    loadingPercentage.textContent = "0%";
-    loadingMessage.textContent = "Arranging the first clues...";
+    function init() {
+        if (initialised) return;
+        initialised = true;
+    }
 
-    analysisItems.forEach((item, index) => {
-        item.classList.toggle("active", index === 0);
-        item.classList.remove("complete");
-    });
+    function startReadingAnalysis() {
+        App.showScreen("loading");
+        resetAnalysisDisplay();
 
-    let progress = 0;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const intervalTime = reducedMotion ? 5 : 45;
-
-    clearInterval(loadingTimer);
-
-    loadingTimer = window.setInterval(() => {
-        progress = Math.min(progress + 2, 100);
-        loadingProgressBar.style.width = `${progress}%`;
-        loadingPercentage.textContent = `${progress}%`;
-        updateAnalysisStage(progress);
-
-        if (progress >= 100) {
-            clearInterval(loadingTimer);
-            finalResult = generateResult();
-            localStorage.setItem(STORAGE_KEYS.result, JSON.stringify(finalResult));
-            displayResult(finalResult);
-
-            setTimeout(() => showScreen("result"), reducedMotion ? 20 : 650);
+        if (App.state.loadingFrame !== null) {
+            window.cancelAnimationFrame(App.state.loadingFrame);
         }
-    }, intervalTime);
-}
 
-function updateAnalysisStage(progress) {
-    let stage = 0;
+        const duration = App.utils.prefersReducedMotion() ? 100 : 2400;
+        const startedAt = performance.now();
 
-    if (progress >= 25) stage = 1;
-    if (progress >= 50) stage = 2;
-    if (progress >= 75) stage = 3;
+        function update(now) {
+            const progress = Math.min(100, Math.round(((now - startedAt) / duration) * 100));
+            setAnalysisProgress(progress);
 
-    const messages = [
-        "Comparing your personality pattern...",
-        "Studying your values and relationship outlook...",
-        "Examining lifestyle and communication clues...",
-        "Preparing the age-matched companion profile..."
-    ];
+            if (progress < 100) {
+                App.state.loadingFrame = window.requestAnimationFrame(update);
+                return;
+            }
 
-    loadingMessage.textContent = messages[stage];
+            App.state.loadingFrame = null;
+            const result = generateResult();
+            App.saveResult(result);
+            displayResult(result);
 
-    analysisItems.forEach((item, index) => {
-        item.classList.toggle("active", index === stage);
-        item.classList.toggle("complete", index < stage);
-    });
-}
+            window.setTimeout(
+                () => App.showScreen("result"),
+                App.utils.prefersReducedMotion() ? 0 : 450
+            );
+        }
+
+        App.state.loadingFrame = window.requestAnimationFrame(update);
+    }
+
+    function resetAnalysisDisplay() {
+        App.elements.loadingProgressBar.style.width = "0%";
+        App.elements.loadingPercentage.textContent = "0%";
+        App.elements.loadingMessage.textContent = "Arranging the first clues...";
+
+        App.elements.analysisItems.forEach((item, index) => {
+            item.classList.toggle("active", index === 0);
+            item.classList.remove("complete");
+        });
+    }
+
+    function setAnalysisProgress(progress) {
+        App.elements.loadingProgressBar.style.width = `${progress}%`;
+        App.elements.loadingPercentage.textContent = `${progress}%`;
+        updateAnalysisStage(progress);
+    }
+
+    function updateAnalysisStage(progress) {
+        const stage = Math.min(3, Math.floor(progress / 25));
+        const messages = [
+            "Comparing your personality pattern...",
+            "Studying your values and relationship outlook...",
+            "Examining lifestyle and communication clues...",
+            "Preparing the age-matched companion profile..."
+        ];
+
+        App.elements.loadingMessage.textContent = messages[stage];
+        App.elements.analysisItems.forEach((item, index) => {
+            item.classList.toggle("active", index === stage);
+            item.classList.toggle("complete", index < stage || progress === 100);
+        });
+    }
 
 function generateResult() {
-    const seed = createSeed(answers);
-    const genderKey = getGenderKey(answers.interest);
+    const seed = App.utils.createSeed(App.state.answers);
+    const genderKey = getGenderKey(App.state.answers.interest);
     const partnerAgeKey = getPartnerAgeKey();
-    const namePool = namePools[partnerAgeKey]?.[genderKey] || namePools["35 to 44"].neutral;
-    const name = choose(namePool, seed, 3);
-    const temperament = choose(temperamentResults, seed, 7);
+    const namePool = Portraits.data.namePools[partnerAgeKey]?.[genderKey] || Portraits.data.namePools["35 to 44"].neutral;
+    const name = App.utils.choose(namePool, seed, 3);
+    const temperament = App.utils.choose(Portraits.data.temperamentResults, seed, 7);
     const personality = buildPersonalityResult(seed);
     const appearance = buildAppearanceResult(seed, partnerAgeKey);
     const values = buildValuesResult(seed);
-    const meeting = buildMeetingResult(answers.meetingPreference, seed);
+    const meeting = buildMeetingResult(App.state.answers.meetingPreference, seed);
     const relationshipStyle = buildRelationshipStyle(seed);
     const affection = buildAffectionResult(seed);
     const futureHome = buildHomeResult(seed);
@@ -79,12 +98,15 @@ function generateResult() {
     const compatibility = calculateCompatibility(seed);
     const currentYear = new Date().getFullYear();
     const relationshipYear = currentYear + 1 + (seed % 7);
-    const generatedFor = answers.firstName || profile.name || "You";
+    const generatedFor = App.state.answers.firstName || App.state.profile.name || "You";
 
     return {
         seed,
         reference: `MO-${String(seed).slice(-6).padStart(6, "0")}`,
-        portraitPath: getCompanionPortraitPath({ genderKey, partnerAgeKey, seed }),
+        portraitPath: Portraits.getCompanionPortraitPath(
+            { genderKey, partnerAgeKey, seed },
+            App.state.answers.portraitBackground
+        ),
         name,
         initial: name.charAt(0),
         genderKey,
@@ -110,23 +132,23 @@ function generateResult() {
 }
 
 function getPartnerAgeKey() {
-    const selected = answers.partnerAge;
+    const selected = App.state.answers.partnerAge;
 
-    if (namePools[selected]) {
+    if (Portraits.data.namePools[selected]) {
         return selected;
     }
 
-    if (selected === "Similar to my age" && namePools[answers.ageRange]) {
-        return answers.ageRange;
+    if (selected === "Similar to my age" && Portraits.data.namePools[App.state.answers.ageRange]) {
+        return App.state.answers.ageRange;
     }
 
     if (selected === "No particular preference") {
-        const ranges = Object.keys(namePools);
-        return choose(ranges, createSeed(answers), 41);
+        const ranges = Object.keys(Portraits.data.namePools);
+        return App.utils.choose(ranges, App.utils.createSeed(App.state.answers), 41);
     }
 
-    if (namePools[answers.ageRange]) {
-        return answers.ageRange;
+    if (Portraits.data.namePools[App.state.answers.ageRange]) {
+        return App.state.answers.ageRange;
     }
 
     return "35 to 44";
@@ -158,16 +180,16 @@ function buildPersonalityResult(seed) {
         "Time spent together without pressure": ["values calm, unhurried time together", "does not need constant activity to feel close"]
     };
 
-    const coreChoices = coreMap[answers.importantQuality] || coreMap.Kindness;
-    const balanceChoices = balanceMap[answers.selfDescription] || balanceMap["Quiet and thoughtful"];
-    const careChoices = careMap[answers.communication] || careMap["A calm conversation"];
+    const coreChoices = coreMap[App.state.answers.importantQuality] || coreMap.Kindness;
+    const balanceChoices = balanceMap[App.state.answers.selfDescription] || balanceMap["Quiet and thoughtful"];
+    const careChoices = careMap[App.state.answers.communication] || careMap["A calm conversation"];
 
-    const core = choose(coreChoices, seed, 5);
-    const balance = choose(balanceChoices, seed, 13);
-    const care = choose(careChoices, seed, 23);
+    const core = App.utils.choose(coreChoices, seed, 5);
+    const balance = App.utils.choose(balanceChoices, seed, 13);
+    const care = App.utils.choose(careChoices, seed, 23);
 
     return {
-        title: `${capitalise(core)}, ${balance}`,
+        title: `${App.utils.capitalise(core)}, ${balance}`,
         text: `They are likely to ${care}. Your answers suggest that character will become more attractive to you as consistency becomes clear.`
     };
 }
@@ -192,8 +214,8 @@ function buildAppearanceResult(seed, partnerAgeKey) {
         "75 or older": ["with a dignified and traditional appearance", "with a kind, familiar presence", "with classic style and a memorable expression"]
     };
 
-    const feature = choose(featureMap[answers.noticeFirst] || featureMap["Their smile"], seed, 17);
-    const ageStyle = choose(ageStyleMap[partnerAgeKey] || ageStyleMap["35 to 44"], seed, 31);
+    const feature = App.utils.choose(featureMap[App.state.answers.noticeFirst] || featureMap["Their smile"], seed, 17);
+    const ageStyle = App.utils.choose(ageStyleMap[partnerAgeKey] || ageStyleMap["35 to 44"], seed, 31);
 
     return {
         title: `${feature} ${ageStyle}`,
@@ -202,9 +224,9 @@ function buildAppearanceResult(seed, partnerAgeKey) {
 }
 
 function buildValuesResult(seed) {
-    const belief = answers.beliefRole;
-    const shared = answers.sharedBeliefs;
-    const family = answers.familyCloseness;
+    const belief = App.state.answers.beliefRole;
+    const shared = App.state.answers.sharedBeliefs;
+    const family = App.state.answers.familyCloseness;
 
     let title = "Respectful, open-minded and guided by shared values";
     let text = "The strongest match is likely to respect your outlook without turning every difference into an argument.";
@@ -275,13 +297,13 @@ function buildMeetingResult(preference, seed) {
     };
 
     const choices = meetingMap[preference] || Object.values(meetingMap).flat();
-    return choose(choices, seed, 43);
+    return App.utils.choose(choices, seed, 43);
 }
 
 function buildRelationshipStyle(seed) {
-    const foundation = answers.relationshipFoundation;
-    const stability = answers.stabilityExcitement;
-    const conflict = answers.conflictStyle;
+    const foundation = App.state.answers.relationshipFoundation;
+    const stability = App.state.answers.stabilityExcitement;
+    const conflict = App.state.answers.conflictStyle;
 
     const foundationMap = {
         Friendship: "A friendship-led bond that deepens into affection",
@@ -307,7 +329,7 @@ function buildRelationshipStyle(seed) {
     };
 
     return {
-        title: foundationMap[foundation] || choose(Object.values(foundationMap), seed, 47),
+        title: foundationMap[foundation] || App.utils.choose(Object.values(foundationMap), seed, 47),
         text: `${stabilityText[stability] || "The relationship is likely to find its own comfortable rhythm."} ${conflictText[conflict] || "Respectful communication will remain important."}`
     };
 }
@@ -322,13 +344,13 @@ function buildAffectionResult(seed) {
         "Making me laugh when I need it": ["Humour, playfulness and emotional lightness", "They may recognise when laughter will help and when a serious feeling needs to be heard first."]
     };
 
-    const selected = affectionMap[answers.affectionStyle];
+    const selected = affectionMap[App.state.answers.affectionStyle];
 
     if (selected) {
         return { title: selected[0], text: selected[1] };
     }
 
-    const fallback = choose(Object.values(affectionMap), seed, 53);
+    const fallback = App.utils.choose(Object.values(affectionMap), seed, 53);
     return { title: fallback[0], text: fallback[1] };
 }
 
@@ -360,14 +382,14 @@ function buildHomeResult(seed) {
     };
 
     return {
-        title: settingMap[answers.homeSetting] || choose(Object.values(settingMap), seed, 59),
-        text: `${socialMap[answers.socialLife] || "The home is likely to feel warm and welcoming."} ${weekendMap[answers.idealWeekend] || "Shared routines may become more meaningful than grand gestures."}`
+        title: settingMap[App.state.answers.homeSetting] || App.utils.choose(Object.values(settingMap), seed, 59),
+        text: `${socialMap[App.state.answers.socialLife] || "The home is likely to feel warm and welcoming."} ${weekendMap[App.state.answers.idealWeekend] || "Shared routines may become more meaningful than grand gestures."}`
     };
 }
 
 function buildOracleMessage(seed) {
-    const choices = oracleMessages[answers.symbol] || Object.values(oracleMessages).flat();
-    return choose(choices, seed, 67);
+    const choices = Portraits.data.oracleMessages[App.state.answers.symbol] || Object.values(Portraits.data.oracleMessages).flat();
+    return App.utils.choose(choices, seed, 67);
 }
 
 function buildAgeClue(partnerAgeKey, seed) {
@@ -388,23 +410,23 @@ function buildAgeClue(partnerAgeKey, seed) {
         [base[0], `${base[1]} Shared pace and values are likely to matter more than an exact age.`]
     ];
 
-    const result = choose(variants, seed, 71);
+    const result = App.utils.choose(variants, seed, 71);
     return { title: result[0], text: result[1] };
 }
 
 function calculateCompatibility(seed) {
     let score = 84 + (seed % 12);
 
-    if (answers.trustStyle === "After seeing consistent actions") score += 1;
-    if (answers.stabilityExcitement === "A balance of stability and excitement") score += 1;
-    if (answers.conflictStyle === "Talking calmly until it is resolved") score += 1;
-    if (answers.sharedBeliefs === "Respect matters more than agreement") score += 1;
+    if (App.state.answers.trustStyle === "After seeing consistent actions") score += 1;
+    if (App.state.answers.stabilityExcitement === "A balance of stability and excitement") score += 1;
+    if (App.state.answers.conflictStyle === "Talking calmly until it is resolved") score += 1;
+    if (App.state.answers.sharedBeliefs === "Respect matters more than agreement") score += 1;
 
     return Math.min(score, 98);
 }
 
 function buildSummary(temperament, relationshipStyle) {
-    const firstName = answers.firstName || profile.name || "Your";
+    const firstName = App.state.answers.firstName || App.state.profile.name || "Your";
     return `${firstName}'s answers point towards ${temperament.toLowerCase()} companionship and ${relationshipStyle.title.toLowerCase()}.`;
 }
 
@@ -422,7 +444,7 @@ function buildNameExplanation(name, ageRange, seed) {
         "a name selected from a generation-aware British name collection"
     ];
 
-    return `${name} was selected as ${choose(descriptions, seed, 73)}.`;
+    return `${name} was selected as ${App.utils.choose(descriptions, seed, 73)}.`;
 }
 
 function buildTimingExplanation(year, seed) {
@@ -434,7 +456,7 @@ function buildTimingExplanation(year, seed) {
         "a time when an ordinary introduction could develop more steadily than expected"
     ];
 
-    return `${year} symbolises ${choose(descriptions, seed, 79)}.`;
+    return `${year} symbolises ${App.utils.choose(descriptions, seed, 79)}.`;
 }
 
 function getGenderKey(interestAnswer) {
@@ -443,195 +465,121 @@ function getGenderKey(interestAnswer) {
     return "neutral";
 }
 
-function displayResult(result) {
-    document.getElementById("result-main-title").textContent = `${result.generatedFor}, a meaningful connection is indicated`;
-    document.getElementById("result-summary").textContent = result.summary;
-    document.getElementById("reading-reference").textContent = `Reading reference: ${result.reference}`;
-    document.getElementById("result-initial").textContent = result.initial;
-    document.getElementById("compatibility-score").textContent = `${result.compatibility}%`;
-    document.getElementById("free-temperament").textContent = result.temperament;
-    document.getElementById("free-meeting-clue").textContent = result.meeting[0];
-    document.getElementById("free-relationship-style").textContent = result.relationshipStyle.title;
+    function displayResult(result) {
+        setText("result-main-title", `${result.generatedFor}, a meaningful connection is indicated`);
+        setText("result-summary", result.summary);
+        setText("reading-reference", `Reading reference: ${result.reference}`);
+        setText("result-initial", result.initial);
+        setText("compatibility-score", `${result.compatibility}%`);
+        setText("free-temperament", result.temperament);
+        setText("free-meeting-clue", result.meeting[0]);
+        setText("free-relationship-style", result.relationshipStyle.title);
+        setText("silhouette-caption", result.silhouetteCaption);
 
-    const portrait = document.getElementById("companion-portrait");
-const portraitWrap = document.getElementById("companion-portrait-wrap");
-const portraitLoadingMessage = document.getElementById(
-    "portrait-loading-message"
-);
+        setText("partner-name", result.name);
+        setText("name-explanation", result.nameExplanation);
+        setText("partner-age", result.ageClue.title);
+        setText("age-explanation", result.ageClue.text);
+        setText("partner-personality", result.personality.title);
+        setText("personality-explanation", result.personality.text);
+        setText("partner-appearance", result.appearance.title);
+        setText("appearance-explanation", result.appearance.text);
+        setText("partner-values", result.values.title);
+        setText("values-explanation", result.values.text);
+        setText("meeting-place", result.meeting[0]);
+        setText("meeting-explanation", result.meeting[1]);
+        setText("relationship-dynamic", result.relationshipStyle.title);
+        setText("relationship-explanation", result.relationshipStyle.text);
+        setText("affection-style", result.affection.title);
+        setText("affection-explanation", result.affection.text);
+        setText("relationship-year", String(result.relationshipYear));
+        setText("timing-explanation", result.timingExplanation);
+        setText("future-home", result.futureHome.title);
+        setText("home-explanation", result.futureHome.text);
+        setText("oracle-message", result.oracleMessage.title);
+        setText("message-explanation", result.oracleMessage.text);
 
-if (portrait && portraitWrap) {
-    const portraitPath = result.portraitPath || "";
-
-    portraitWrap.classList.remove(
-        "portrait-is-loaded",
-        "portrait-is-revealing",
-        "portrait-is-revealed",
-        "portrait-load-failed"
-    );
-
-    portraitWrap.classList.add("portrait-is-loading");
-    portraitWrap.setAttribute("aria-busy", "true");
-
-    portrait.classList.add("portrait-obscured");
-    portrait.alt =
-        `Vintage companion portrait selected for ${result.generatedFor}`;
-
-    if (portraitLoadingMessage) {
-        portraitLoadingMessage.textContent =
-            "Sketching the first lines…";
+        loadPortrait(result);
+        App.modules.payments.lockPremiumReading();
     }
 
-    let messageStage = 0;
+    function loadPortrait(result) {
+        const portrait = document.getElementById("companion-portrait");
+        const portraitWrap = document.getElementById("companion-portrait-wrap");
+        const message = document.getElementById("portrait-loading-message");
 
-    const loadingMessages = [
-        "Sketching the first lines…",
-        "Shading the portrait…",
-        "Developing the old photograph…",
-        "Preparing the final image…"
-    ];
+        if (!portrait || !portraitWrap) return;
 
-    const messageTimer = window.setInterval(() => {
-        messageStage =
-            (messageStage + 1) % loadingMessages.length;
-
-        if (portraitLoadingMessage) {
-            portraitLoadingMessage.textContent =
-                loadingMessages[messageStage];
-        }
-    }, 1150);
-
-    const finishPortraitLoading = () => {
-        window.clearInterval(messageTimer);
-
-        portraitWrap.classList.remove("portrait-is-loading");
-        portraitWrap.classList.add("portrait-is-loaded");
-        portraitWrap.setAttribute("aria-busy", "false");
-    };
-
-    portrait.onload = function () {
-        /*
-        Keep the animation visible briefly even when the image is
-        already cached, so the transition never feels abrupt.
-        */
-
-        window.setTimeout(finishPortraitLoading, 650);
-    };
-
-    portrait.onerror = function () {
-        window.clearInterval(messageTimer);
-
-        console.error(
-            "The companion portrait could not be loaded:",
-            portraitPath
-        );
-
-        portraitWrap.classList.remove("portrait-is-loading");
-        portraitWrap.classList.add("portrait-load-failed");
-        portraitWrap.setAttribute("aria-busy", "false");
-
-        if (portraitLoadingMessage) {
-            portraitLoadingMessage.textContent =
-                "The portrait could not be developed.";
-        }
-
-        document.getElementById(
-            "silhouette-caption"
-        ).textContent =
-            "Portrait unavailable — please check the assets folder";
-    };
-
-    /*
-    Assigning src comes after the load and error handlers.
-    This prevents a fast cached image from completing before the
-    browser has attached the handlers.
-    */
-
-    portrait.src = portraitPath;
-
-    if (portrait.complete && portrait.naturalWidth > 0) {
-        portrait.onload();
-    }
-}
-
-    document.getElementById("silhouette-caption").textContent = result.silhouetteCaption;
-
-    document.getElementById("partner-name").textContent = result.name;
-    document.getElementById("name-explanation").textContent = result.nameExplanation;
-    document.getElementById("partner-age").textContent = result.ageClue.title;
-    document.getElementById("age-explanation").textContent = result.ageClue.text;
-    document.getElementById("partner-personality").textContent = result.personality.title;
-    document.getElementById("personality-explanation").textContent = result.personality.text;
-    document.getElementById("partner-appearance").textContent = result.appearance.title;
-    document.getElementById("appearance-explanation").textContent = result.appearance.text;
-    document.getElementById("partner-values").textContent = result.values.title;
-    document.getElementById("values-explanation").textContent = result.values.text;
-    document.getElementById("meeting-place").textContent = result.meeting[0];
-    document.getElementById("meeting-explanation").textContent = result.meeting[1];
-    document.getElementById("relationship-dynamic").textContent = result.relationshipStyle.title;
-    document.getElementById("relationship-explanation").textContent = result.relationshipStyle.text;
-    document.getElementById("affection-style").textContent = result.affection.title;
-    document.getElementById("affection-explanation").textContent = result.affection.text;
-    document.getElementById("relationship-year").textContent = String(result.relationshipYear);
-    document.getElementById("timing-explanation").textContent = result.timingExplanation;
-    document.getElementById("future-home").textContent = result.futureHome.title;
-    document.getElementById("home-explanation").textContent = result.futureHome.text;
-    document.getElementById("oracle-message").textContent = result.oracleMessage.title;
-    document.getElementById("message-explanation").textContent = result.oracleMessage.text;
-
-    lockPremiumReading();
-}
-
-// =====================================================
-// PORTRAIT UNLOCK REVEAL
-// =====================================================
-
-document.addEventListener(
-    "click",
-    (event) => {
-        const clickedUnlockButton =
-            event.target.closest("#unlock-button");
-
-        if (!clickedUnlockButton) {
-            return;
-        }
-
-        const portrait =
-            document.getElementById("companion-portrait");
-
-        const portraitWrap =
-            document.getElementById("companion-portrait-wrap");
-
-        if (!portrait || !portraitWrap) {
-            return;
-        }
-
+        window.clearInterval(App.state.portraitMessageTimer);
         portraitWrap.classList.remove(
+            "portrait-is-loaded",
             "portrait-is-revealing",
-            "portrait-is-revealed"
+            "portrait-is-revealed",
+            "portrait-load-failed"
         );
+        portraitWrap.classList.add("portrait-is-loading");
+        portraitWrap.setAttribute("aria-busy", "true");
+        portrait.classList.add("portrait-obscured");
+        portrait.alt = `Vintage companion portrait selected for ${result.generatedFor}`;
 
-        /*
-        Force the browser to recognise the reset before starting
-        the reveal again.
-        */
+        const messages = [
+            "Sketching the first lines…",
+            "Shading the portrait…",
+            "Developing the old photograph…",
+            "Preparing the final image…"
+        ];
+        let messageIndex = 0;
+        if (message) message.textContent = messages[0];
 
-        void portraitWrap.offsetWidth;
+        App.state.portraitMessageTimer = window.setInterval(() => {
+            messageIndex = (messageIndex + 1) % messages.length;
+            if (message) message.textContent = messages[messageIndex];
+        }, 1150);
 
-        portraitWrap.classList.add("portrait-is-revealing");
+        let settled = false;
 
-        window.setTimeout(() => {
-            portrait.classList.remove("portrait-obscured");
-        }, 180);
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            window.clearInterval(App.state.portraitMessageTimer);
+            portraitWrap.classList.remove("portrait-is-loading");
+            portraitWrap.classList.add("portrait-is-loaded");
+            portraitWrap.setAttribute("aria-busy", "false");
+        };
 
-        window.setTimeout(() => {
-            portraitWrap.classList.remove(
-                "portrait-is-revealing"
-            );
+        const fail = () => {
+            if (settled) return;
+            settled = true;
+            window.clearInterval(App.state.portraitMessageTimer);
+            portraitWrap.classList.remove("portrait-is-loading");
+            portraitWrap.classList.add("portrait-load-failed");
+            portraitWrap.setAttribute("aria-busy", "false");
+            if (message) message.textContent = "The portrait could not be developed.";
+            setText("silhouette-caption", "Portrait unavailable — please check the assets folder");
+            console.error("The companion portrait could not be loaded:", result.portraitPath);
+        };
 
-            portraitWrap.classList.add(
-                "portrait-is-revealed"
-            );
-        }, 1650);
-    },
-    true
-);
+        portrait.onload = () => window.setTimeout(finish, 650);
+        portrait.onerror = fail;
+        portrait.src = result.portraitPath || "";
+
+        if (portrait.complete) {
+            window.setTimeout(() => {
+                if (portrait.naturalWidth > 0) finish();
+                else if (portrait.currentSrc || portrait.src) fail();
+            }, 0);
+        }
+    }
+
+    function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = String(value ?? "");
+    }
+
+    App.modules.results = {
+        init,
+        startReadingAnalysis,
+        generateResult,
+        displayResult
+    };
+})();

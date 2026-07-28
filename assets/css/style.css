@@ -3307,69 +3307,89 @@ textarea {
     }
 }
 /* =====================================================
-   FINAL QUOTATION MARK LAYOUT
-   The mark is now part of the normal layout.
-   It cannot float outside the box.
+   FINAL OPENING QUOTATION MARK
+   Anchored neatly across the top-left border
    ===================================================== */
 
 .oracle-display .guide-message {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
+    position: relative !important;
+    overflow: visible !important;
 
-    gap: 7px !important;
-
-    padding: 18px 24px 21px !important;
-    text-align: center !important;
-}
-
-/* Completely cancel every old absolute-position rule */
-.oracle-display .guide-message .quote-mark {
-    position: static !important;
-
-    inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    left: auto !important;
-
+    /* Keep the actual quotation centred */
     display: block !important;
-
-    width: auto !important;
-    height: auto !important;
-
-    margin: 0 auto !important;
-    padding: 0 !important;
-
-    color: var(--burgundy) !important;
-
-    font-family: Georgia, serif !important;
-    font-size: 34px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-
+    padding: 22px 24px 20px !important;
     text-align: center !important;
-
-    transform: none !important;
-    pointer-events: none !important;
 }
 
-/* Keep the rotating message directly beneath it */
 .oracle-display .guide-message p {
     width: 100% !important;
     margin: 0 !important;
     text-align: center !important;
 }
 
-/* Same intentional layout on phones */
+/*
+The parchment background behind the symbol cuts through
+the top border cleanly, making it look intentionally attached.
+*/
+.oracle-display .guide-message .quote-mark {
+    position: absolute !important;
+
+    top: -15px !important;
+    left: 18px !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    z-index: 4 !important;
+
+    display: block !important;
+    width: auto !important;
+    height: 30px !important;
+
+    margin: 0 !important;
+    padding: 0 6px !important;
+
+    color: var(--burgundy) !important;
+    background: #fff7df !important;
+
+    font-family: Georgia, "Times New Roman", serif !important;
+    font-size: 43px !important;
+    font-weight: 700 !important;
+    line-height: 0.92 !important;
+
+    border-radius: 3px !important;
+
+    transform: none !important;
+    pointer-events: none !important;
+}
+
+/* Match the newer parchment-gradient message box */
+.oracle-display .guide-message[style] .quote-mark {
+    background: #fff7df !important;
+}
+
+/* Phones and small tablets */
 @media (max-width: 760px) {
     .oracle-display .guide-message {
-        gap: 5px !important;
-        padding: 16px 20px 19px !important;
+        padding: 20px 18px 18px !important;
     }
 
     .oracle-display .guide-message .quote-mark {
-        font-size: 30px !important;
+        top: -12px !important;
+        left: 14px !important;
+
+        height: 25px !important;
+        padding-inline: 5px !important;
+
+        font-size: 36px !important;
+        line-height: 0.9 !important;
+    }
+}
+
+/* Very narrow phones */
+@media (max-width: 390px) {
+    .oracle-display .guide-message .quote-mark {
+        top: -11px !important;
+        left: 12px !important;
+        font-size: 34px !important;
     }
 }

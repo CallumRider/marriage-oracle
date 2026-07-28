@@ -518,35 +518,51 @@ h3 {
 
 .guide-message {
     position: relative;
-    width: min(420px, 92%);
-    margin-top: -22px;
-    padding: 24px 28px;
+    width: min(440px, 92%);
+    margin-top: 28px;
+    padding: 36px 48px 34px;
     color: #3d302a;
     background: #fff7df;
     border: 1px solid #806249;
-    box-shadow: var(--shadow-small);
+    box-shadow:
+        var(--shadow-small),
+        inset 0 0 0 10px rgba(111, 38, 53, 0.055);
     text-align: center;
 }
 
+/* Proper opening and closing quotation marks, kept inside the card. */
 .guide-message::before,
 .guide-message::after {
-    content: "";
     position: absolute;
-    top: 10px;
-    bottom: 10px;
-    width: 1px;
-    background: rgba(111, 38, 53, 0.27);
+    z-index: 1;
+    color: var(--burgundy);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 50px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
 }
 
-.guide-message::before { left: 10px; }
-.guide-message::after { right: 10px; }
+.guide-message::before {
+    content: "“";
+    top: 6px;
+    left: 18px;
+}
+
+.guide-message::after {
+    content: "”";
+    right: 18px;
+    bottom: -7px;
+}
 
 .guide-message p {
+    position: relative;
+    z-index: 2;
     margin: 0;
     font-family: var(--serif-display);
     font-size: 23px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.35;
 }
 
 
@@ -3293,32 +3309,64 @@ textarea {
 }
 
 /* =====================================================
-   FINAL HOMEPAGE GUIDE MESSAGE
-   Clean message box beneath the matchmaker
+   HOMEPAGE MATCHMAKER MESSAGE — RESPONSIVE FINISHING
    ===================================================== */
 
 #home .oracle-display .guide-message {
-    position: relative !important;
-    overflow: visible !important;
-    display: block !important;
-    padding: 22px 24px 20px !important;
-    text-align: center !important;
+    overflow: hidden;
 }
 
 #home .oracle-display .guide-message > p {
-    width: 100% !important;
-    margin: 0 !important;
-    text-align: center !important;
+    width: 100%;
+    text-align: center;
 }
 
-
-/* Phones and small tablets */
 @media (max-width: 760px) {
     #home .oracle-display .guide-message {
-        padding: 20px 18px 18px !important;
+        width: min(430px, 94%);
+        margin-top: 22px;
+        padding: 32px 38px 30px;
+    }
+
+    #home .oracle-display .guide-message::before,
+    #home .oracle-display .guide-message::after {
+        font-size: 43px;
+    }
+
+    #home .oracle-display .guide-message::before {
+        top: 6px;
+        left: 15px;
+    }
+
+    #home .oracle-display .guide-message::after {
+        right: 15px;
+        bottom: -6px;
     }
 }
 
-/* Very narrow phones */
 @media (max-width: 390px) {
+    #home .oracle-display .guide-message {
+        width: 96%;
+        margin-top: 18px;
+        padding: 29px 30px 27px;
+    }
+
+    #home .oracle-display .guide-message > p {
+        font-size: 20px;
+        line-height: 1.35;
+    }
+
+    #home .oracle-display .guide-message::before,
+    #home .oracle-display .guide-message::after {
+        font-size: 37px;
+    }
+
+    #home .oracle-display .guide-message::before {
+        left: 12px;
+    }
+
+    #home .oracle-display .guide-message::after {
+        right: 12px;
+        bottom: -4px;
+    }
 }

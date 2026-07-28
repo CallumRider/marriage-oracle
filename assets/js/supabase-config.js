@@ -6,6 +6,6 @@
  * Never place a secret key or service_role key in this file.
  */
 window.MarriageOracleSupabaseConfig = Object.freeze({
-    url: "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE",
-    publishableKey: "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+    url: "https://slidrigmunrutclthebl.supabase.co",
+    publishableKey: "sb_publishable_qPTEtPq2eAZEfAIPOzbhEA_VP0VU4-B"
 });

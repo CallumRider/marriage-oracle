@@ -3293,8 +3293,8 @@ textarea {
 }
 
 /* =====================================================
-   FINAL OPENING QUOTATION MARK
-   A proper opening quote anchored across the top-left border
+   FINAL HOMEPAGE GUIDE MESSAGE
+   Clean message box beneath the matchmaker
    ===================================================== */
 
 #home .oracle-display .guide-message {
@@ -3311,66 +3311,14 @@ textarea {
     text-align: center !important;
 }
 
-/*
-The fixed-size parchment tab straddles the top border.
-The quote sits low inside the tab, so it appears in the
-upper-left corner rather than floating above the box.
-*/
-#home .oracle-display .guide-message > .quote-mark {
-    position: absolute !important;
-    top: 0 !important;
-    left: 18px !important;
-    right: auto !important;
-    bottom: auto !important;
-    z-index: 10 !important;
-
-    display: flex !important;
-    align-items: flex-end !important;
-    justify-content: center !important;
-
-    width: 36px !important;
-    height: 28px !important;
-    margin: 0 !important;
-    padding: 0 3px 1px !important;
-
-    color: var(--burgundy) !important;
-    background: #fff7df !important;
-
-    font-family: Georgia, "Times New Roman", serif !important;
-    font-size: 46px !important;
-    font-weight: 700 !important;
-    line-height: 0.72 !important;
-
-    border: 0 !important;
-    border-radius: 2px !important;
-
-    transform: translateY(-44%) !important;
-    pointer-events: none !important;
-}
 
 /* Phones and small tablets */
 @media (max-width: 760px) {
     #home .oracle-display .guide-message {
         padding: 20px 18px 18px !important;
     }
-
-    #home .oracle-display .guide-message > .quote-mark {
-        left: 14px !important;
-        width: 32px !important;
-        height: 25px !important;
-        padding-bottom: 1px !important;
-        font-size: 40px !important;
-        transform: translateY(-43%) !important;
-    }
 }
 
 /* Very narrow phones */
 @media (max-width: 390px) {
-    #home .oracle-display .guide-message > .quote-mark {
-        left: 12px !important;
-        width: 30px !important;
-        height: 24px !important;
-        font-size: 38px !important;
-    }
 }
-

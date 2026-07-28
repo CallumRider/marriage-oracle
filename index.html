@@ -12,16 +12,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 
-   <link rel="stylesheet" href="assets/css/style.css?v=20260728-accounts">
+   <link rel="stylesheet" href="assets/css/style.css?v=20260728-payments">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8/dist/umd/supabase.min.js" defer></script>
 <script src="assets/js/supabase-config.js" defer></script>
-<script src="assets/js/app.js" defer></script>
+<script src="assets/js/app.js?v=20260729-payments" defer></script>
 <script src="assets/js/quiz.js" defer></script>
 <script src="assets/js/portraits.js" defer></script>
-<script src="assets/js/auth.js" defer></script>
+<script src="assets/js/auth.js?v=20260729-payments" defer></script>
 <script src="assets/js/results.js" defer></script>
-<script src="assets/js/payments.js" defer></script>
+<script src="assets/js/payments.js?v=20260729-payments" defer></script>
 </head>
 <body>
     <div class="paper-noise" aria-hidden="true"></div>
@@ -940,6 +940,13 @@
                     </div>
                 </div>
 
+                <p
+                    id="payment-status-message"
+                    class="payment-status-message"
+                    aria-live="polite"
+                    hidden
+                ></p>
+
                 <section class="locked-reading-section">
 
                     <div class="locked-heading">
@@ -1009,8 +1016,36 @@
                             <span class="lock-symbol" aria-hidden="true">♜</span>
                             <h3>Your detailed reading is prepared</h3>
                             <p>Unlock the age-matched name, life-stage clue, personality, values, appearance, meeting story, relationship style, affection pattern, timing and future-life reading.</p>
-                            <button id="unlock-button" class="primary-button" type="button">Preview Full Reading — £0.99</button>
-                            <small id="payment-note">Demo mode is active. No payment will be taken.</small>
+
+                            <div class="unlock-choice-panel">
+                                <button id="unlock-button" class="primary-button unlock-payment-button" type="button">Unlock Full Reading — £0.99</button>
+
+                                <div class="unlock-divider" aria-hidden="true">
+                                    <span>or</span>
+                                </div>
+
+                                <form id="promo-code-form" class="promo-code-form" novalidate>
+                                    <label for="promo-code-input">Complimentary code</label>
+                                    <div class="promo-code-row">
+                                        <input
+                                            id="promo-code-input"
+                                            class="text-input promo-code-input"
+                                            name="promo-code"
+                                            type="text"
+                                            minlength="3"
+                                            maxlength="64"
+                                            autocomplete="off"
+                                            autocapitalize="none"
+                                            spellcheck="false"
+                                            placeholder="Enter your code"
+                                        >
+                                        <button id="promo-code-submit" class="secondary-button" type="submit">Apply Code</button>
+                                    </div>
+                                    <p id="promo-code-message" class="payment-inline-message" aria-live="polite" hidden></p>
+                                </form>
+                            </div>
+
+                            <small id="payment-note">Secure checkout by Stripe. Sign-in is required so the unlock remains attached to your account.</small>
                         </div>
                     </div>
                 </section>

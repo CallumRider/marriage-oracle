@@ -3307,43 +3307,69 @@ textarea {
     }
 }
 /* =====================================================
-   GUIDE MESSAGE QUOTATION MARK FIX
+   FINAL QUOTATION MARK LAYOUT
+   The mark is now part of the normal layout.
+   It cannot float outside the box.
    ===================================================== */
 
 .oracle-display .guide-message {
-    position: relative !important;
-    padding-top: 34px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 7px !important;
+
+    padding: 18px 24px 21px !important;
+    text-align: center !important;
 }
 
-/* Keep the quotation mark neatly inside the message box */
+/* Completely cancel every old absolute-position rule */
 .oracle-display .guide-message .quote-mark {
-    position: absolute !important;
-    top: 6px !important;
-    left: 18px !important;
+    position: static !important;
+
+    inset: auto !important;
+    top: auto !important;
     right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
 
-    margin: 0 !important;
-    transform: none !important;
+    display: block !important;
 
-    color: var(--burgundy);
-    font-family: Georgia, serif;
-    font-size: 48px !important;
-    font-weight: 700;
+    width: auto !important;
+    height: auto !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    color: var(--burgundy) !important;
+
+    font-family: Georgia, serif !important;
+    font-size: 34px !important;
+    font-weight: 700 !important;
     line-height: 1 !important;
 
-    opacity: 0.9;
-    pointer-events: none;
+    text-align: center !important;
+
+    transform: none !important;
+    pointer-events: none !important;
 }
 
-/* Slightly smaller and closer to the corner on phones */
+/* Keep the rotating message directly beneath it */
+.oracle-display .guide-message p {
+    width: 100% !important;
+    margin: 0 !important;
+    text-align: center !important;
+}
+
+/* Same intentional layout on phones */
 @media (max-width: 760px) {
     .oracle-display .guide-message {
-        padding: 32px 20px 20px !important;
+        gap: 5px !important;
+        padding: 16px 20px 19px !important;
     }
 
     .oracle-display .guide-message .quote-mark {
-        top: 5px !important;
-        left: 14px !important;
-        font-size: 42px !important;
+        font-size: 30px !important;
     }
 }

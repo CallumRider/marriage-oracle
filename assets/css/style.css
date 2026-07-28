@@ -2827,4 +2827,482 @@ body {
         width: 96%;
     }
 }
+/* =====================================================
+   MOBILE LAYOUT REPAIR — KEEP THIS AS THE FINAL CSS BLOCK
+   ===================================================== */
 
+html,
+body {
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+#app,
+.screen,
+.home-screen,
+.app-screen,
+.hero-section,
+.hero-copy,
+.oracle-display,
+.quiz-layout,
+.quiz-guide-panel,
+.quiz-main-panel,
+.progress-panel,
+.question-card,
+.result-page,
+.result-hero-grid,
+.silhouette-panel,
+.teaser-panel {
+    min-width: 0;
+    max-width: 100%;
+}
+
+img,
+svg,
+video,
+canvas,
+button,
+input,
+select,
+textarea {
+    max-width: 100%;
+}
+
+/* The quiz Matchmaker is always contained, never cropped or zoomed. */
+.quiz-guide-panel .mini-matchmaker-image {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    transform: none !important;
+}
+
+@media (max-width: 760px) {
+    body {
+        min-width: 0;
+        font-size: 16px;
+    }
+
+    .header-inner,
+    .home-screen,
+    .app-screen,
+    .footer-inner,
+    .footer-disclosure {
+        width: calc(100% - 16px) !important;
+        max-width: calc(100% - 16px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* ==============================
+       MOBILE HEADER
+       ============================== */
+
+    .header-inner {
+        min-height: 72px;
+        gap: 10px;
+    }
+
+    .brand {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 9px;
+    }
+
+    .brand-copy {
+        min-width: 0;
+    }
+
+    .brand-copy strong {
+        font-size: 20px;
+        line-height: 1.02;
+    }
+
+    .brand-copy small {
+        display: none;
+    }
+
+    .header-button {
+        flex: 0 0 108px;
+        width: 108px;
+        min-height: 48px;
+        padding: 7px 8px;
+        font-size: 13px;
+        line-height: 1.25;
+    }
+
+    .home-screen,
+    .app-screen {
+        margin-top: 12px;
+        margin-bottom: 42px;
+    }
+
+    /* ==============================
+       MOBILE HOMEPAGE
+       ============================== */
+
+    .hero-section {
+        display: block !important;
+        width: 100%;
+        min-height: 0;
+        padding: 36px 16px 34px !important;
+        overflow: hidden;
+    }
+
+    .hero-copy {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .hero-copy > * {
+        max-width: 100%;
+    }
+
+    .hero-copy .kicker {
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 11px;
+        line-height: 1.45;
+        letter-spacing: 1.25px;
+        overflow-wrap: anywhere;
+    }
+
+    .hero-copy h1 {
+        width: 100%;
+        margin-bottom: 22px;
+        font-size: clamp(40px, 11vw, 48px) !important;
+        line-height: 1.08;
+        letter-spacing: -0.6px;
+        overflow-wrap: normal;
+        word-break: normal;
+    }
+
+    .hero-description {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 16px;
+        line-height: 1.7;
+        overflow-wrap: break-word;
+    }
+
+    .hero-actions {
+        width: 100%;
+        gap: 16px;
+    }
+
+    .hero-actions .primary-button,
+    .wide-button {
+        width: 100%;
+    }
+
+    .trust-row {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .trust-row span {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* ==============================
+       MOBILE HERO MATCHMAKER
+       ============================== */
+
+    .oracle-display {
+        width: 100%;
+        min-width: 0;
+        margin-top: 30px;
+    }
+
+    .oracle-display .matchmaker-frame {
+        width: 100% !important;
+        max-width: 330px !important;
+        height: 455px !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        padding: 38px 8px 12px !important;
+        overflow: hidden !important;
+    }
+
+    .oracle-display .matchmaker-image {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
+        object-fit: contain !important;
+        object-position: center bottom !important;
+
+        /*
+        Transform enlarges the artwork visually without
+        making the page or grid wider than the screen.
+        */
+        transform: translateY(8px) scale(1.06) !important;
+        transform-origin: center bottom !important;
+    }
+
+    .oracle-display .guide-message {
+        position: relative !important;
+        inset: auto !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 96% !important;
+        max-width: 390px !important;
+        margin: 14px auto 0 !important;
+        padding: 20px 24px !important;
+        transform: none !important;
+        text-align: center !important;
+    }
+
+    /* ==============================
+       MOBILE QUIZ GUIDE
+       ============================== */
+
+    .quiz-layout {
+        display: block !important;
+        width: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .quiz-guide-panel {
+        display: grid !important;
+        grid-template-columns: 92px minmax(0, 1fr) !important;
+        grid-template-areas:
+            "portrait speech"
+            "portrait exit" !important;
+        align-items: center !important;
+        justify-content: stretch !important;
+        gap: 8px 14px !important;
+        min-height: 0 !important;
+        padding: 14px !important;
+    }
+
+    .quiz-guide-panel .mini-frame {
+        grid-area: portrait;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        width: 92px !important;
+        min-width: 92px !important;
+        max-width: 92px !important;
+
+        height: 118px !important;
+        min-height: 0 !important;
+        max-height: 118px !important;
+
+        margin: 0 !important;
+        padding: 4px !important;
+        overflow: hidden !important;
+
+        border-width: 4px !important;
+        border-radius: 42% 42% 13px 13px !important;
+    }
+
+    .quiz-guide-panel .guide-speech {
+        grid-area: speech;
+        width: 100% !important;
+        min-width: 0;
+        margin: 0 !important;
+        padding: 12px !important;
+        font-size: 17px !important;
+        line-height: 1.3;
+    }
+
+    .quiz-guide-panel .guide-speech::before {
+        top: calc(50% - 10px) !important;
+        left: -10px !important;
+        width: 20px !important;
+        height: 20px !important;
+
+        border-top: 0 !important;
+        border-bottom: 1px solid #bb9551 !important;
+    }
+
+    .quiz-guide-panel .quiet-button {
+        grid-area: exit;
+        grid-column: 2 !important;
+        justify-self: center;
+        align-self: start;
+
+        margin: 0 !important;
+        padding: 0 2px 2px;
+        font-size: 15px;
+        white-space: normal !important;
+    }
+
+    /* ==============================
+       MOBILE QUIZ CONTENT
+       ============================== */
+
+    .quiz-main-panel {
+        width: 100%;
+        padding: 16px 10px 22px !important;
+    }
+
+    .progress-panel {
+        width: 100%;
+        margin-bottom: 18px;
+        padding: 16px !important;
+    }
+
+    .progress-topline,
+    .progress-details {
+        width: 100%;
+        gap: 3px;
+    }
+
+    .progress-topline > *,
+    .progress-details > * {
+        min-width: 0;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .question-card {
+        width: 100%;
+        padding: 24px 17px 28px !important;
+    }
+
+    .question-card h2 {
+        width: 100%;
+        font-size: clamp(34px, 9.7vw, 40px) !important;
+        line-height: 1.06;
+        overflow-wrap: break-word;
+        word-break: normal;
+    }
+
+    .question-help {
+        font-size: 16px;
+        line-height: 1.55;
+    }
+
+    .answer-button {
+        width: 100%;
+        min-height: 58px;
+        padding: 13px 14px;
+        gap: 12px;
+        font-size: 16px;
+        line-height: 1.35;
+    }
+
+    /* ==============================
+       ALL OTHER MOBILE PAGES
+       ============================== */
+
+    .content-section,
+    .app-panel,
+    .result-page {
+        width: 100%;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .steps-grid,
+    .feature-grid,
+    .preview-cards,
+    .profile-choice-grid,
+    .result-hero-grid,
+    .premium-reading,
+    .result-actions,
+    .analysis-list {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .reading-card,
+    .choice-card,
+    .step-card,
+    .feature-grid article,
+    .preview-cards article,
+    .silhouette-panel,
+    .teaser-panel {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 390px) {
+    .header-inner,
+    .home-screen,
+    .app-screen,
+    .footer-inner,
+    .footer-disclosure {
+        width: calc(100% - 12px) !important;
+        max-width: calc(100% - 12px) !important;
+    }
+
+    .brand-seal {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+
+    .brand-copy strong {
+        font-size: 19px;
+    }
+
+    .header-button {
+        flex-basis: 106px;
+        width: 106px;
+    }
+
+    .hero-section {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    .hero-copy h1 {
+        font-size: 40px !important;
+    }
+
+    .quiz-guide-panel {
+        grid-template-columns: 84px minmax(0, 1fr) !important;
+        gap: 7px 11px !important;
+        padding: 12px !important;
+    }
+
+    .quiz-guide-panel .mini-frame {
+        width: 84px !important;
+        min-width: 84px !important;
+        max-width: 84px !important;
+
+        height: 108px !important;
+        max-height: 108px !important;
+
+        padding: 3px !important;
+    }
+
+    .quiz-guide-panel .guide-speech {
+        padding: 11px 10px !important;
+        font-size: 16px !important;
+    }
+
+    .quiz-guide-panel .quiet-button {
+        font-size: 14px;
+    }
+
+    .quiz-main-panel {
+        padding: 14px 8px 20px !important;
+    }
+
+    .progress-panel {
+        padding: 14px !important;
+    }
+
+    .question-card {
+        padding: 22px 15px 25px !important;
+    }
+
+    .question-card h2 {
+        font-size: 35px !important;
+    }
+}

@@ -12,8 +12,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 
-   <link rel="stylesheet" href="assets/css/style.css?v=20260728-clean">
+   <link rel="stylesheet" href="assets/css/style.css?v=20260728-accounts">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8/dist/umd/supabase.min.js" defer></script>
+<script src="assets/js/supabase-config.js" defer></script>
 <script src="assets/js/app.js" defer></script>
 <script src="assets/js/quiz.js" defer></script>
 <script src="assets/js/portraits.js" defer></script>
@@ -39,6 +41,15 @@
                 <a href="#how-it-works">How it works</a>
                 <a href="#reading-includes">Your reading</a>
                 <a href="#questions">Questions</a>
+
+                <button
+                    id="account-button"
+                    class="account-nav-button"
+                    type="button"
+                    aria-label="Open account"
+                >
+                    Sign in
+                </button>
 
                 <button
                     id="header-start-button"
@@ -302,7 +313,7 @@
         </section>
 
         <!-- ======================================
-             PROFILE OR GUEST PAGE
+             ACCOUNT OR GUEST PAGE
              ====================================== -->
 
         <section id="profile-screen" class="screen app-screen" hidden>
@@ -318,23 +329,29 @@
 
                 <div class="section-heading compact-heading">
                     <p class="kicker">Before we begin</p>
-                    <h2>How would you like to continue?</h2>
+                    <h2>Continue your way</h2>
 
                     <p>
-                        You can take the reading as a guest or save your
-                        name and email on this device for convenience.
+                        Take a private guest reading, or create an account so
+                        your progress and completed readings follow you between devices.
                     </p>
                 </div>
 
-                <div class="profile-choice-grid">
+                <div id="auth-loading-panel" class="account-loading-panel" aria-live="polite">
+                    <span class="account-loading-seal" aria-hidden="true">M</span>
+                    <p>Checking your account…</p>
+                </div>
 
-                    <article class="choice-card">
+                <div id="auth-signed-out-panel" class="profile-choice-grid" hidden>
+
+                    <article id="guest-choice-card" class="choice-card">
                         <span class="choice-icon" aria-hidden="true">♙</span>
 
                         <h3>Continue as guest</h3>
 
                         <p>
-                            No sign-in and no personal details required.
+                            No sign-in is required. Progress stays on this device,
+                            and optional private answers remain in this browser session.
                         </p>
 
                         <button
@@ -346,66 +363,242 @@
                         </button>
                     </article>
 
-                    <article class="choice-card featured-choice">
+                    <article class="choice-card featured-choice account-access-card">
                         <span class="choice-icon" aria-hidden="true">✉</span>
 
-                        <h3>Save this reading</h3>
+                        <h3>Your Oracle account</h3>
 
                         <p>
-                            Your name and email are stored only in this browser
-                            in the current version.
+                            Sign in to resume a reading, save completed results and
+                            use the same account on another device.
                         </p>
 
-                        <form id="profile-form" novalidate>
-
-                            <label for="profile-name">
-                                First name
-                            </label>
-
-                            <input
-                                id="profile-name"
-                                class="text-input"
-                                type="text"
-                                maxlength="30"
-                                autocomplete="given-name"
-                                placeholder="For example, Margaret"
+                        <div class="auth-tabs" role="tablist" aria-label="Account options">
+                            <button
+                                id="sign-in-tab"
+                                class="auth-tab active"
+                                type="button"
+                                role="tab"
+                                aria-selected="true"
+                                aria-controls="sign-in-form"
                             >
+                                Sign in
+                            </button>
 
-                            <label for="profile-email">
-                                Email address
-                            </label>
+                            <button
+                                id="sign-up-tab"
+                                class="auth-tab"
+                                type="button"
+                                role="tab"
+                                aria-selected="false"
+                                aria-controls="sign-up-form"
+                            >
+                                Create account
+                            </button>
+                        </div>
 
+                        <form id="sign-in-form" class="auth-form" novalidate>
+                            <label for="sign-in-email">Email address</label>
                             <input
-                                id="profile-email"
+                                id="sign-in-email"
                                 class="text-input"
                                 type="email"
                                 maxlength="120"
                                 autocomplete="email"
+                                required
                                 placeholder="name@example.com"
                             >
 
-                            <p
-                                id="profile-error"
-                                class="form-error"
-                                role="alert"
-                                hidden
-                            ></p>
+                            <label for="sign-in-password">Password</label>
+                            <input
+                                id="sign-in-password"
+                                class="text-input"
+                                type="password"
+                                minlength="8"
+                                maxlength="128"
+                                autocomplete="current-password"
+                                required
+                                placeholder="Your password"
+                            >
+
+                            <button class="primary-button" type="submit">
+                                Sign In
+                            </button>
 
                             <button
-                                class="primary-button"
-                                type="submit"
+                                id="show-forgot-password-button"
+                                class="quiet-button auth-text-button"
+                                type="button"
                             >
-                                Save and Continue
+                                Forgotten your password?
                             </button>
                         </form>
-                    </article>
 
+                        <form id="sign-up-form" class="auth-form" novalidate hidden>
+                            <label for="sign-up-name">First name</label>
+                            <input
+                                id="sign-up-name"
+                                class="text-input"
+                                type="text"
+                                maxlength="30"
+                                autocomplete="given-name"
+                                required
+                                placeholder="For example, Margaret"
+                            >
+
+                            <label for="sign-up-email">Email address</label>
+                            <input
+                                id="sign-up-email"
+                                class="text-input"
+                                type="email"
+                                maxlength="120"
+                                autocomplete="email"
+                                required
+                                placeholder="name@example.com"
+                            >
+
+                            <label for="sign-up-password">Create a password</label>
+                            <input
+                                id="sign-up-password"
+                                class="text-input"
+                                type="password"
+                                minlength="8"
+                                maxlength="128"
+                                autocomplete="new-password"
+                                required
+                                placeholder="At least 8 characters"
+                            >
+
+                            <label for="sign-up-password-confirm">Confirm password</label>
+                            <input
+                                id="sign-up-password-confirm"
+                                class="text-input"
+                                type="password"
+                                minlength="8"
+                                maxlength="128"
+                                autocomplete="new-password"
+                                required
+                                placeholder="Type the password again"
+                            >
+
+                            <button class="primary-button" type="submit">
+                                Create My Account
+                            </button>
+                        </form>
+
+                        <form id="forgot-password-form" class="auth-form" novalidate hidden>
+                            <h4>Reset your password</h4>
+                            <p class="input-note">
+                                Enter your email and we will send a secure recovery link.
+                            </p>
+
+                            <label for="forgot-password-email">Email address</label>
+                            <input
+                                id="forgot-password-email"
+                                class="text-input"
+                                type="email"
+                                maxlength="120"
+                                autocomplete="email"
+                                required
+                                placeholder="name@example.com"
+                            >
+
+                            <button class="primary-button" type="submit">
+                                Send Recovery Email
+                            </button>
+
+                            <button
+                                id="cancel-forgot-password-button"
+                                class="quiet-button auth-text-button"
+                                type="button"
+                            >
+                                Back to sign in
+                            </button>
+                        </form>
+
+                        <p
+                            id="auth-message"
+                            class="auth-message"
+                            role="status"
+                            aria-live="polite"
+                            hidden
+                        ></p>
+                    </article>
                 </div>
 
-                <p class="small-note">
-                    Questions about beliefs and portrait appearance are optional.
-                    You may choose “Prefer not to say” wherever it is offered.
-                    Saved profiles remain only in this browser.
+                <section id="account-dashboard" class="account-dashboard" hidden>
+                    <div class="account-summary-card">
+                        <div>
+                            <p class="account-eyebrow">Signed in</p>
+                            <h3 id="account-name">Your account</h3>
+                            <p id="account-email" class="account-email"></p>
+                        </div>
+
+                        <button
+                            id="sign-out-button"
+                            class="secondary-button compact-button"
+                            type="button"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+
+                    <div class="account-dashboard-actions">
+                        <button
+                            id="account-resume-button"
+                            class="primary-button"
+                            type="button"
+                            hidden
+                        >
+                            Resume Current Reading
+                        </button>
+
+                        <button
+                            id="account-new-reading-button"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Start a New Reading
+                        </button>
+                    </div>
+
+                    <div class="saved-readings-panel">
+                        <div class="saved-readings-heading">
+                            <div>
+                                <p class="kicker">Your archive</p>
+                                <h3>Saved readings</h3>
+                            </div>
+
+                            <button
+                                id="refresh-readings-button"
+                                class="quiet-button"
+                                type="button"
+                            >
+                                Refresh
+                            </button>
+                        </div>
+
+                        <p id="account-readings-empty" class="empty-state" hidden>
+                            You have no saved readings yet. Start one and your
+                            progress will appear here automatically.
+                        </p>
+
+                        <div id="account-readings-list" class="saved-readings-list"></div>
+                    </div>
+
+                    <p
+                        id="account-dashboard-message"
+                        class="auth-message"
+                        role="status"
+                        aria-live="polite"
+                        hidden
+                    ></p>
+                </section>
+
+                <p class="small-note account-privacy-note">
+                    Account data is protected by Supabase authentication and
+                    row-level database rules. Questions about beliefs and portrait
+                    appearance remain optional. This experience is for entertainment only.
                 </p>
             </div>
         </section>
@@ -901,7 +1094,7 @@
                 Leave the reading?
             </h2>
 
-            <p>
+            <p id="save-exit-copy">
                 Your current answers are already saved in this browser.
                 You can return later on this device.
             </p>
@@ -925,5 +1118,65 @@
             </div>
         </div>
     </div>
+
+
+    <!-- PASSWORD RECOVERY POP-UP -->
+
+    <div
+        id="password-recovery-dialog"
+        class="dialog-backdrop"
+        hidden
+    >
+        <div
+            class="dialog-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="password-recovery-title"
+        >
+            <h2 id="password-recovery-title">Choose a new password</h2>
+
+            <p>
+                Your recovery link has been accepted. Enter a new password
+                for your Marriage Oracle account.
+            </p>
+
+            <form id="password-recovery-form" class="auth-form" novalidate>
+                <label for="recovery-password">New password</label>
+                <input
+                    id="recovery-password"
+                    class="text-input"
+                    type="password"
+                    minlength="8"
+                    maxlength="128"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <label for="recovery-password-confirm">Confirm new password</label>
+                <input
+                    id="recovery-password-confirm"
+                    class="text-input"
+                    type="password"
+                    minlength="8"
+                    maxlength="128"
+                    autocomplete="new-password"
+                    required
+                >
+
+                <p
+                    id="password-recovery-message"
+                    class="auth-message"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></p>
+
+                <button class="primary-button" type="submit">
+                    Save New Password
+                </button>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>

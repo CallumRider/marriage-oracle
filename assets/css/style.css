@@ -2007,361 +2007,6 @@ h3 {
 
 
 /* =====================================================
-   FINAL MATCHMAKER ARTWORK OVERRIDES
-   ===================================================== */
-
-.matchmaker-frame {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    width: min(100%, 430px);
-    min-height: 540px;
-    margin: 0 auto;
-    overflow: hidden;
-    background:
-        radial-gradient(circle at 50% 35%, rgba(242, 218, 163, 0.42), transparent 48%),
-        linear-gradient(180deg, rgba(255, 248, 226, 0.88), rgba(113, 75, 52, 0.15));
-    border: 5px double #76513c;
-    border-radius: 48% 48% 22px 22px;
-    box-shadow:
-        inset 0 0 35px rgba(69, 40, 28, 0.22),
-        0 18px 38px rgba(50, 29, 21, 0.22);
-}
-
-.matchmaker-frame::before,
-.oracle-display .matchmaker-frame::after {
-    content: none !important;
-    display: none !important;
-    background: none !important;
-}
-
-.matchmaker-image {
-    position: relative;
-    z-index: 1;
-    display: block;
-    width: 100%;
-    height: 100%;
-    min-height: 540px;
-    object-fit: cover;
-    object-position: center;
-    filter: sepia(0.12) contrast(1.04) saturate(0.9);
-    animation: matchmakerFloat 5s ease-in-out infinite;
-}
-
-.matchmaker-frame .frame-stars {
-    position: absolute;
-    top: 28px;
-    right: 28px;
-    z-index: 3;
-    color: #b18a45;
-    font-size: 30px;
-    text-shadow:
-        -255px 95px 0 #b18a45,
-        -220px 300px 0 rgba(177, 138, 69, 0.75);
-    animation: matchmakerSparkle 2.8s ease-in-out infinite;
-}
-
-.quiz-guide-panel .mini-frame {
-    position: relative;
-    width: 165px;
-    height: 205px;
-    margin: 0 auto 22px;
-    overflow: hidden;
-    background: radial-gradient(circle at center, #f4e1b7, #c59c68);
-    border: 4px double #76513c;
-    border-radius: 48% 48% 18px 18px;
-    box-shadow:
-        inset 0 0 18px rgba(63, 38, 27, 0.24),
-        0 10px 22px rgba(52, 30, 21, 0.2);
-}
-
-.mini-matchmaker-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    filter: sepia(0.15) contrast(1.05) saturate(0.88);
-}
-
-@keyframes matchmakerFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-@keyframes matchmakerSparkle {
-    0%, 100% { opacity: 0.55; transform: scale(0.92) rotate(0deg); }
-    50% { opacity: 1; transform: scale(1.08) rotate(8deg); }
-}
-
-/* Floating message card over the lower portrait. */
-
-.oracle-display {
-    position: relative;
-    padding-bottom: 0;
-}
-
-.oracle-display .ornamental-frame {
-    margin-bottom: 0;
-}
-
-.oracle-display .guide-message {
-    position: absolute;
-    left: 50%;
-    bottom: 24px;
-    z-index: 10;
-    width: calc(100% - 42px);
-    max-width: 380px;
-    margin: 0;
-    padding: 22px 24px 20px 48px;
-    transform: translateX(-50%);
-    color: #3d2a24;
-    background:
-        linear-gradient(145deg, rgba(255, 249, 226, 0.97), rgba(232, 208, 163, 0.97));
-    border: 3px double #76513c;
-    border-radius: 14px;
-    box-shadow:
-        0 12px 28px rgba(42, 24, 17, 0.34),
-        inset 0 0 18px rgba(106, 70, 44, 0.12);
-    text-align: center;
-}
-
-.oracle-display .guide-message::before {
-    content: none !important;
-    display: none !important;
-}
-
-.oracle-display .guide-message .quote-mark {
-    display: block !important;
-    position: absolute;
-    top: 8px;
-    left: 15px;
-    margin: 0;
-    color: #8a3d32;
-    font-family: Georgia, serif;
-    font-size: 46px;
-    font-weight: bold;
-    line-height: 1;
-    pointer-events: none;
-}
-
-.oracle-display .guide-message p {
-    margin: 0;
-    font-family: "Libre Baskerville", Georgia, serif;
-    color: #3d2a24;
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 1.55;
-}
-
-/* =====================================================
-   COMPANION RESULT PORTRAIT
-   ===================================================== */
-
-.companion-portrait-wrap {
-    position: relative;
-    width: min(100%, 310px);
-    aspect-ratio: 4 / 5;
-    margin: 0 auto;
-    overflow: hidden;
-    background: #3e312b;
-    border: 7px double #d2b36c;
-    border-radius: 48% 48% 16px 16px;
-    box-shadow:
-        0 18px 30px rgba(0, 0, 0, 0.35),
-        inset 0 0 20px rgba(255, 240, 190, 0.18);
-}
-
-.companion-portrait {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    filter: sepia(0.16) contrast(1.05) saturate(0.9);
-    transition:
-        filter 0.7s ease,
-        transform 0.7s ease,
-        opacity 0.7s ease;
-}
-
-.companion-portrait.portrait-obscured {
-    filter:
-        sepia(0.65)
-        brightness(0.52)
-        contrast(1.18)
-        blur(5px);
-    transform: scale(1.04);
-    opacity: 0.88;
-}
-
-@media (max-width: 700px) {
-    .matchmaker-frame {
-        width: min(100%, 360px);
-        min-height: 450px;
-    }
-
-    .matchmaker-image {
-        min-height: 450px;
-    }
-
-    .quiz-guide-panel .mini-frame {
-        width: 145px;
-        height: 180px;
-    }
-
-    .oracle-display .guide-message {
-        bottom: 16px;
-        width: calc(100% - 28px);
-        padding: 19px 18px 17px 42px;
-        border-radius: 12px;
-    }
-
-    .oracle-display .guide-message .quote-mark {
-        top: 7px;
-        left: 12px;
-        font-size: 39px;
-    }
-
-    .oracle-display .guide-message p {
-        font-size: 15px;
-        line-height: 1.5;
-    }
-
-    .companion-portrait-wrap {
-        width: min(100%, 270px);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .matchmaker-image,
-    .matchmaker-frame .frame-stars,
-    .companion-portrait {
-        animation: none;
-        transition: none;
-    }
-}
-/* =====================================================
-   REFINED MATCHMAKER IMAGE
-   ===================================================== */
-
-.matchmaker-frame {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    width: min(100%, 490px);
-    min-height: 590px;
-    margin-inline: auto;
-    padding: 42px 26px 76px;
-    overflow: hidden;
-    isolation: isolate;
-}
-
-.matchmaker-frame::before {
-    content: "";
-    position: absolute;
-    inset: 15px;
-    z-index: -2;
-    border-radius: inherit;
-    background:
-        radial-gradient(
-            circle at 50% 35%,
-            rgba(244, 218, 160, 0.27),
-            transparent 56%
-        ),
-        linear-gradient(
-            180deg,
-            rgba(255, 247, 219, 0.12),
-            rgba(95, 56, 31, 0.08)
-        );
-}
-
-.matchmaker-image {
-    display: block;
-    width: auto;
-    max-width: 94%;
-    height: auto;
-    max-height: 520px;
-    object-fit: contain;
-    object-position: center bottom;
-    transform: translateY(8px);
-    filter:
-        contrast(1.03)
-        saturate(0.92)
-        drop-shadow(0 16px 15px rgba(46, 27, 17, 0.2));
-}
-
-/*
-The message overlaps only the fading bottom of the illustration,
-not his face, hands or watch.
-*/
-
-.oracle-display .guide-message {
-    position: relative;
-    z-index: 4;
-    width: min(92%, 430px);
-    margin: -54px auto 0;
-}
-
-.mini-frame {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    min-height: 205px;
-    padding: 16px 12px 0;
-    overflow: hidden;
-}
-
-.mini-matchmaker-image {
-    display: block;
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    max-height: 205px;
-    object-fit: contain;
-    object-position: center bottom;
-    filter:
-        contrast(1.03)
-        saturate(0.9)
-        drop-shadow(0 8px 8px rgba(46, 27, 17, 0.18));
-}
-
-@media (max-width: 760px) {
-    .matchmaker-frame {
-        width: min(100%, 410px);
-        min-height: 500px;
-        padding: 32px 18px 68px;
-    }
-
-    .matchmaker-image {
-        max-width: 96%;
-        max-height: 440px;
-        transform: translateY(4px);
-    }
-
-    .oracle-display .guide-message {
-        margin-top: -45px;
-    }
-}
-
-@media (max-width: 480px) {
-    .matchmaker-frame {
-        min-height: 435px;
-        padding: 28px 12px 58px;
-    }
-
-    .matchmaker-image {
-        max-height: 380px;
-    }
-
-    .oracle-display .guide-message {
-        width: 94%;
-        margin-top: -38px;
-    }
-}
-/* =====================================================
    OLD-TIMEY PORTRAIT DEVELOPMENT ANIMATION
    ===================================================== */
 
@@ -2739,341 +2384,447 @@ Second reveal: used when the £0.99 reading is unlocked.
         transition-duration: 0.15s;
     }
 }
+
 /* =====================================================
-   FINAL MATCHMAKER POSITIONING FIX
-   Paste this at the very bottom of style.css
+   CLEAN MATCHMAKER + RESPONSIVE QUIZ LAYOUT
+   This replaces every older Matchmaker override block.
    ===================================================== */
 
-/* Keep the large Matchmaker and quotation in one central column */
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* -----------------------------
+   HOMEPAGE MATCHMAKER
+   ----------------------------- */
+
 .oracle-display {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     width: 100%;
+    min-width: 0;
 }
-
-/* =====================================================
-   LARGE HOMEPAGE MATCHMAKER
-   ===================================================== */
 
 .oracle-display .matchmaker-frame {
     position: relative;
-
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: center;
-
-    width: min(100%, 500px);
-    height: 650px;
-    min-height: 650px;
-
-    /*
-    Extra room at the top moves his head away
-    from the decorative frame.
-    */
-    padding: 70px 10px 18px;
-
+    width: min(100%, 460px);
+    height: 620px;
+    min-height: 0;
     margin: 0 auto;
+    padding: 56px 14px 18px;
     overflow: hidden;
-    box-sizing: border-box;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(246, 221, 165, 0.5), transparent 52%),
+        linear-gradient(180deg, #f7e6bd, #c89f6d);
+    border: 6px double #76513c;
+    border-radius: 48% 48% 22px 22px;
+    box-shadow:
+        inset 0 0 34px rgba(69, 40, 28, 0.2),
+        0 18px 38px rgba(50, 29, 21, 0.22);
 }
 
-/*
-Larger figure, but moved down enough that his head
-does not touch the top of the frame.
-*/
+.oracle-display .matchmaker-frame::before,
+.oracle-display .matchmaker-frame::after {
+    content: none;
+}
+
 .oracle-display .matchmaker-image {
     display: block;
-
-    width: 108%;
+    width: 112%;
     max-width: none;
     height: auto;
-    max-height: 590px;
-
+    max-height: 550px;
     margin: 0;
     object-fit: contain;
-    object-position: center top;
-
-    transform: translateY(32px) scale(1.07);
-    transform-origin: center top;
-
+    object-position: center bottom;
+    transform: translateY(12px);
+    transform-origin: center bottom;
     filter:
-        contrast(1.03)
-        saturate(0.93)
-        drop-shadow(0 15px 14px rgba(46, 27, 17, 0.2));
+        sepia(0.08)
+        contrast(1.04)
+        saturate(0.92)
+        drop-shadow(0 14px 14px rgba(46, 27, 17, 0.18));
 }
 
-/* =====================================================
-   CENTRED QUOTATION BOX
-   ===================================================== */
+.oracle-display .frame-stars {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    z-index: 3;
+    color: #b18a45;
+    font-size: 28px;
+    text-shadow:
+        -280px 110px 0 rgba(177, 138, 69, 0.85),
+        -235px 330px 0 rgba(177, 138, 69, 0.65);
+}
 
 .oracle-display .guide-message {
     position: relative;
     inset: auto;
-
+    left: auto;
+    bottom: auto;
     display: block;
     align-self: center;
-
     width: min(92%, 430px);
     max-width: 430px;
-
-    /*
-    Positive margin means it now sits underneath
-    the frame rather than overlapping it.
-    */
     margin: 18px auto 0;
-
+    padding: 22px 28px;
     transform: none;
+    color: #3d302a;
+    background: #fff7df;
+    border: 1px solid #806249;
+    border-radius: 0;
+    box-shadow: var(--shadow-small);
     text-align: center;
-    z-index: 5;
+}
+
+.oracle-display .guide-message::before,
+.oracle-display .guide-message::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: rgba(111, 38, 53, 0.27);
+}
+
+.oracle-display .guide-message::before {
+    left: 10px;
+}
+
+.oracle-display .guide-message::after {
+    right: 10px;
+}
+
+.oracle-display .guide-message .quote-mark {
+    position: absolute;
+    top: -28px;
+    left: 18px;
+    display: block;
+    color: var(--burgundy);
+    font-size: 68px;
+    line-height: 1;
 }
 
 .oracle-display .guide-message p {
-    margin-inline: auto;
+    margin: 0;
+    color: #3d302a;
+    font-family: var(--serif-display);
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1.25;
     text-align: center;
 }
 
-/*
-Keep the quotation mark decorative without pulling
-the whole box to one side.
-*/
-.oracle-display .guide-message .quote-mark {
-    position: absolute;
-    top: 4px;
-    left: 16px;
-}
-
-/* =====================================================
-   QUIZ-SIDE MATCHMAKER
-   ===================================================== */
+/* -----------------------------
+   QUIZ MATCHMAKER — FULL IMAGE,
+   NOT CROPPED OR ZOOMED
+   ----------------------------- */
 
 .quiz-guide-panel .mini-frame {
     position: relative;
-
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-
-    width: 100%;
-    height: 245px;
-    min-height: 245px;
-
-    padding: 16px 8px 0;
-    margin: 0 auto 12px;
-
+    width: 205px;
+    height: 260px;
+    min-height: 0;
+    margin: 0 auto 22px;
+    padding: 7px;
     overflow: hidden;
-    box-sizing: border-box;
+    background:
+        radial-gradient(circle at 50% 38%, #f4e1b7, #c59c68);
+    border: 6px double #76513c;
+    border-radius: 45% 45% 15% 15%;
+    box-shadow:
+        inset 0 0 18px rgba(63, 38, 27, 0.22),
+        0 12px 24px rgba(52, 30, 21, 0.22);
 }
 
-/*
-Zoom into the upper body, face, cards and watch.
-The lower fading part of the illustration is intentionally cropped.
-*/
 .quiz-guide-panel .mini-matchmaker-image {
     display: block;
-
-    width: 128%;
+    width: 100%;
     max-width: none;
-    height: auto;
+    height: 100%;
     max-height: none;
-
+    padding: 0;
     object-fit: contain;
-    object-position: center top;
-
-    transform: translateY(18px) scale(1.08);
-    transform-origin: center top;
-
+    object-position: center center;
+    transform: none;
     filter:
+        sepia(0.1)
         contrast(1.04)
         saturate(0.92)
-        drop-shadow(0 8px 9px rgba(46, 27, 17, 0.19));
+        drop-shadow(0 6px 6px rgba(46, 27, 17, 0.14));
 }
 
-.quiz-guide-panel .guide-speech {
-    width: 100%;
-    margin: 0 auto 16px;
-    text-align: center;
-}
-
-/* =====================================================
+/* -----------------------------
    TABLETS
-   ===================================================== */
+   ----------------------------- */
 
-@media (max-width: 900px) {
-    .oracle-display .matchmaker-frame {
-        width: min(100%, 455px);
-        height: 590px;
-        min-height: 590px;
-        padding-top: 62px;
+@media (max-width: 980px) {
+    .quiz-guide-panel {
+        display: grid;
+        grid-template-columns: 118px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 16px;
+        min-height: 0;
+        padding: 18px 20px;
     }
 
-    .oracle-display .matchmaker-image {
-        width: 109%;
-        max-height: 535px;
-        transform: translateY(28px) scale(1.06);
+    .quiz-guide-panel .mini-frame {
+        width: 118px;
+        height: 150px;
+        margin: 0;
+        padding: 5px;
+        border-width: 5px;
     }
 
-    .oracle-display .guide-message {
-        margin-top: 16px;
+    .quiz-guide-panel .guide-speech {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 16px;
+        font-size: 19px;
+    }
+
+    .quiz-guide-panel .quiet-button {
+        margin: 0;
+        white-space: nowrap;
     }
 }
 
-/* =====================================================
-   PHONES
-   ===================================================== */
+/* -----------------------------
+   PHONES, INCLUDING IPHONE 12
+   ----------------------------- */
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
+    .header-inner {
+        gap: 12px;
+    }
+
+    .brand {
+        min-width: 0;
+        gap: 10px;
+    }
+
+    .brand-copy {
+        min-width: 0;
+    }
+
+    .brand-copy strong {
+        font-size: 20px;
+        line-height: 1.02;
+    }
+
+    .header-button {
+        flex: 0 0 auto;
+        max-width: 116px;
+        padding: 8px 11px;
+        line-height: 1.25;
+    }
+
+    .app-screen {
+        width: calc(100% - 16px);
+        margin: 10px auto 42px;
+    }
+
+    .quiz-layout {
+        width: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .quiz-guide-panel {
+        grid-template-columns: 96px minmax(0, 1fr);
+        grid-template-areas:
+            "portrait speech"
+            "portrait exit";
+        align-items: center;
+        gap: 8px 14px;
+        padding: 14px;
+    }
+
+    .quiz-guide-panel .mini-frame {
+        grid-area: portrait;
+        width: 96px;
+        height: 124px;
+        margin: 0;
+        padding: 4px;
+        border-width: 4px;
+        border-radius: 42% 42% 13px 13px;
+    }
+
+    .quiz-guide-panel .guide-speech {
+        grid-area: speech;
+        width: 100%;
+        margin: 0;
+        padding: 13px 12px;
+        font-size: 17px;
+        line-height: 1.28;
+    }
+
+    .quiz-guide-panel .quiet-button {
+        grid-area: exit;
+        grid-column: auto;
+        justify-self: start;
+        margin: 0;
+        padding: 2px 0;
+        font-size: 15px;
+    }
+
+    .quiz-main-panel {
+        padding: 18px 14px 24px;
+    }
+
+    .progress-panel {
+        margin-bottom: 18px;
+        padding: 16px;
+    }
+
+    .progress-topline {
+        gap: 6px;
+    }
+
+    .progress-details {
+        gap: 2px;
+        overflow-wrap: anywhere;
+    }
+
+    .question-card {
+        padding: 24px 18px 28px;
+    }
+
+    .question-card h2 {
+        font-size: clamp(35px, 10vw, 42px);
+        line-height: 1.03;
+        overflow-wrap: anywhere;
+    }
+
+    .question-help {
+        margin-bottom: 22px;
+        font-size: 16px;
+        line-height: 1.55;
+    }
+
+    .answer-button {
+        min-height: 58px;
+        padding: 13px 14px;
+        gap: 12px;
+        font-size: 16px;
+        line-height: 1.35;
+    }
+
+    .answer-button::before {
+        width: 23px;
+        height: 23px;
+    }
+
     .oracle-display .matchmaker-frame {
-        width: min(100%, 390px);
-        height: 515px;
-        min-height: 515px;
-
-        padding: 54px 4px 12px;
+        width: min(100%, 360px);
+        height: 500px;
+        padding: 42px 10px 15px;
     }
 
     .oracle-display .matchmaker-image {
         width: 112%;
-        max-height: 465px;
-
-        transform: translateY(24px) scale(1.05);
+        max-height: 445px;
+        transform: translateY(10px);
     }
 
     .oracle-display .guide-message {
         width: min(94%, 390px);
-        margin: 14px auto 0;
+        margin-top: 14px;
+        padding: 20px 24px;
     }
 
-    .quiz-guide-panel .mini-frame {
-        width: min(100%, 300px);
-        height: 225px;
-        min-height: 225px;
-
-        margin-inline: auto;
-    }
-
-    .quiz-guide-panel .mini-matchmaker-image {
-        width: 130%;
-        transform: translateY(16px) scale(1.08);
+    .oracle-display .guide-message p {
+        font-size: 20px;
     }
 }
 
-/* =====================================================
-   VERY SMALL PHONES
-   ===================================================== */
+@media (max-width: 430px) {
+    .brand-copy small {
+        display: none;
+    }
 
-@media (max-width: 400px) {
+    .brand-seal {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+
+    .brand-copy strong {
+        font-size: 19px;
+    }
+
+    .header-button {
+        max-width: 108px;
+        min-height: 46px;
+        padding: 7px 9px;
+        font-size: 13px;
+    }
+
+    .quiz-guide-panel {
+        grid-template-columns: 84px minmax(0, 1fr);
+        gap: 7px 11px;
+        padding: 12px;
+    }
+
+    .quiz-guide-panel .mini-frame {
+        width: 84px;
+        height: 108px;
+        padding: 3px;
+    }
+
+    .quiz-guide-panel .guide-speech {
+        padding: 11px 10px;
+        font-size: 16px;
+    }
+
+    .quiz-guide-panel .quiet-button {
+        font-size: 14px;
+    }
+
+    .quiz-main-panel {
+        padding: 14px 10px 20px;
+    }
+
+    .progress-panel {
+        padding: 14px;
+    }
+
+    .question-card {
+        padding: 22px 15px 25px;
+    }
+
+    .question-card h2 {
+        font-size: 36px;
+    }
+
     .oracle-display .matchmaker-frame {
-        height: 470px;
-        min-height: 470px;
-        padding-top: 48px;
+        width: min(100%, 330px);
+        height: 455px;
+        padding-top: 38px;
     }
 
     .oracle-display .matchmaker-image {
-        width: 114%;
-        max-height: 425px;
-
-        transform: translateY(22px) scale(1.04);
+        max-height: 405px;
     }
 
     .oracle-display .guide-message {
-        margin-top: 12px;
-    }
-
-    .quiz-guide-panel .mini-frame {
-        height: 210px;
-        min-height: 210px;
-    }
-
-    .quiz-guide-panel .mini-matchmaker-image {
-        width: 134%;
-        transform: translateY(14px) scale(1.06);
-    }
-}
-/* =====================================================
-   MATCHMAKER FINAL SIZE ADJUSTMENTS
-   Paste at the very bottom of style.css
-   ===================================================== */
-
-/* Slightly enlarge the homepage Matchmaker */
-.oracle-display .matchmaker-image {
-    width: 114%;
-    max-width: none;
-    transform: translateY(30px) scale(1.09);
-    transform-origin: center top;
-}
-
-/* Undo the excessive zoom on the quiz Matchmaker */
-.quiz-guide-panel .mini-frame {
-    height: 245px;
-    min-height: 245px;
-    padding: 14px 10px 0;
-    overflow: hidden;
-}
-
-.quiz-guide-panel .mini-matchmaker-image {
-    width: auto;
-    max-width: 96%;
-    height: auto;
-    max-height: 225px;
-
-    object-fit: contain;
-    object-position: center top;
-
-    transform: translateY(10px) scale(1);
-    transform-origin: center top;
-}
-
-/* Tablet adjustments */
-@media (max-width: 900px) {
-    .oracle-display .matchmaker-image {
-        width: 115%;
-        transform: translateY(27px) scale(1.08);
-    }
-
-    .quiz-guide-panel .mini-matchmaker-image {
-        max-width: 95%;
-        max-height: 220px;
-        transform: translateY(9px);
+        width: 96%;
     }
 }
 
-/* Phone adjustments */
-@media (max-width: 600px) {
-    .oracle-display .matchmaker-image {
-        width: 117%;
-        transform: translateY(23px) scale(1.07);
-    }
-
-    .quiz-guide-panel .mini-frame {
-        width: min(100%, 300px);
-        height: 220px;
-        min-height: 220px;
-        margin-inline: auto;
-    }
-
-    .quiz-guide-panel .mini-matchmaker-image {
-        max-width: 94%;
-        max-height: 205px;
-        transform: translateY(8px);
-    }
-}
-
-/* Very small phones */
-@media (max-width: 400px) {
-    .oracle-display .matchmaker-image {
-        width: 118%;
-        transform: translateY(21px) scale(1.06);
-    }
-
-    .quiz-guide-panel .mini-frame {
-        height: 205px;
-        min-height: 205px;
-    }
-
-    .quiz-guide-panel .mini-matchmaker-image {
-        max-width: 92%;
-        max-height: 190px;
-        transform: translateY(7px);
-    }
-}

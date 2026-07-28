@@ -145,9 +145,19 @@
 
     function restartReading() {
         const shouldRestart = window.confirm(
-            "Start again and clear the answers saved in this browser?"
+            App.state.profile.mode === "account"
+                ? "Start a new reading? Your completed reading will remain saved in your account."
+                : "Start again and clear the answers saved in this browser?"
         );
         if (!shouldRestart) return;
+
+        if (App.state.profile.mode === "account" && App.modules.auth.user) {
+            App.modules.auth.startNewReading().catch((error) => {
+                console.error("A new account reading could not be started.", error);
+                window.alert("The new reading could not be started. Please try again.");
+            });
+            return;
+        }
 
         App.clearQuizProgress();
         App.state.answers = App.state.profile.mode === "saved" && App.state.profile.name

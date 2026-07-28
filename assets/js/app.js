@@ -14,6 +14,7 @@
         privateAnswers: "marriageOraclePrivateAnswersV2",
         questionIndex: "marriageOracleQuestionIndexV2",
         result: "marriageOracleResultV2",
+        activeReadingId: "marriageOracleActiveReadingIdV1",
         awaitingPayment: "marriageOracleAwaitingPayment"
     });
 
@@ -191,10 +192,12 @@
         writeJSON("localStorage", STORAGE_KEYS.answers, normalAnswers);
         writeJSON("sessionStorage", STORAGE_KEYS.privateAnswers, privateAnswers);
         writeText("localStorage", STORAGE_KEYS.questionIndex, state.currentQuestionIndex);
+
+        modules.auth?.queueProgressSync?.();
     }
 
     function saveProfile() {
-        if (state.profile.mode === "saved") {
+        if (state.profile.mode === "saved" || state.profile.mode === "account") {
             writeJSON("localStorage", STORAGE_KEYS.profile, state.profile);
         } else {
             removeStoredValue("localStorage", STORAGE_KEYS.profile);
@@ -204,6 +207,7 @@
     function saveResult(result) {
         state.finalResult = result;
         writeJSON("localStorage", STORAGE_KEYS.result, result);
+        modules.auth?.saveCompletedReading?.(result);
     }
 
     function restoreSavedProfile() {
@@ -213,8 +217,14 @@
             return;
         }
 
+        const mode = saved.mode === "account"
+            ? "account"
+            : saved.mode === "saved"
+                ? "saved"
+                : "guest";
+
         state.profile = {
-            mode: saved.mode === "saved" ? "saved" : "guest",
+            mode,
             name: typeof saved.name === "string" ? saved.name : "",
             email: typeof saved.email === "string" ? saved.email : ""
         };
@@ -355,6 +365,14 @@
 
     function openSaveDialog() {
         saveProgress();
+
+        const copy = byId("save-exit-copy");
+        if (copy) {
+            copy.textContent = state.profile.mode === "account"
+                ? "Your current answers are being saved to your account. You can continue on this or another device."
+                : "Your current answers are saved in this browser. You can return later on this device.";
+        }
+
         if (elements.saveExitDialog) {
             elements.saveExitDialog.hidden = false;
             elements.continueQuizButton?.focus();

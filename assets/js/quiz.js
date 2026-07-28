@@ -544,11 +544,17 @@ const questions = [
         elements.progressBar.style.width = `${progress}%`;
         elements.progressTrack.setAttribute("aria-valuenow", String(progress));
         elements.guideSpeech.textContent = question.guide || "Consider your answer carefully.";
-        elements.savedStatus.textContent = question.private
-            ? "This answer is kept only for this session"
-            : App.state.profile.mode === "saved"
-                ? `Saved for ${App.state.profile.name}`
-                : "Answers save on this device";
+        if (question.private) {
+            elements.savedStatus.textContent = App.state.profile.mode === "account"
+                ? "Saved privately to your account"
+                : "This answer is kept only for this session";
+        } else if (App.state.profile.mode === "account") {
+            elements.savedStatus.textContent = "Saved securely to your account";
+        } else if (App.state.profile.mode === "saved") {
+            elements.savedStatus.textContent = `Saved for ${App.state.profile.name}`;
+        } else {
+            elements.savedStatus.textContent = "Answers save on this device";
+        }
 
         elements.answerArea.replaceChildren();
 
@@ -665,9 +671,17 @@ const questions = [
         const value = normaliseAnswer(question, rawValue);
         App.state.answers[question.id] = value;
 
-        if (question.id === "firstName" && App.state.profile.mode === "saved") {
-            App.state.profile.name = value;
-            App.saveProfile();
+        if (question.id === "firstName") {
+            if (App.state.profile.mode === "saved" || App.state.profile.mode === "account") {
+                App.state.profile.name = value;
+                App.saveProfile();
+            }
+
+            if (App.state.profile.mode === "account") {
+                App.modules.auth.updateFirstName(value).catch((error) => {
+                    console.warn("The account name could not be updated.", error);
+                });
+            }
         }
 
         App.saveProgress();

@@ -25,7 +25,17 @@
     --gold-pale: #f0cf78;
 
     --green: #3f5b46;
+    --green-dark: #23432e;
+    --green-soft: #e9f3e7;
+    --green-border: #7d9f82;
+
     --danger: #68151f;
+    --danger-soft: #fbe8df;
+    --danger-border: #b36a71;
+
+    --info-dark: #4a3a2f;
+    --info-soft: #f7edcf;
+    --info-border: #b79555;
 
     --border: rgba(77, 51, 35, 0.34);
     --border-soft: rgba(77, 51, 35, 0.2);
@@ -909,13 +919,8 @@ p {
 }
 
 .form-error {
-    margin: 15px 0 0;
-    padding: 12px 14px;
-    color: var(--danger);
-    background: #fbe8df;
-    border: 1px solid #b36a71;
-    font-size: 0.875rem;
-    font-weight: 700;
+    width: 100%;
+    margin: 16px 0 0;
 }
 
 /* ========================================================================== 
@@ -2711,27 +2716,22 @@ p {
 }
 
 .auth-message {
-    margin: 18px 0 0;
-    padding: 13px 15px;
-    color: #4b3a31;
-    background: rgba(231, 215, 175, 0.55);
-    border: 1px solid rgba(91, 61, 40, 0.3);
-    border-radius: var(--radius-small);
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1.5;
+    width: 100%;
+    max-width: 760px;
+    margin: 18px auto 0;
 }
 
-.auth-message[data-type="success"] {
-    color: #274934;
-    background: #e5f0e2;
-    border-color: #7d9f82;
+.auth-form > .auth-message {
+    margin-top: 7px;
 }
 
-.auth-message[data-type="error"] {
-    color: #68151f;
-    background: #fbe8df;
-    border-color: #b36a71;
+.account-dashboard > .auth-message {
+    max-width: none;
+    margin: 0;
+}
+
+.dialog-card .auth-message {
+    margin-top: 7px;
 }
 
 .account-dashboard {
@@ -3001,44 +3001,132 @@ p {
     }
 }
 
+/* ==========================================================================
+   FEEDBACK AND STATUS MESSAGES
+   ========================================================================== */
+
+.auth-message,
+.payment-status-message,
+.payment-inline-message,
+.form-error {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 54px;
+    padding: 15px 17px;
+    overflow-wrap: anywhere;
+    color: var(--info-dark);
+    background: var(--info-soft);
+    border: 1px solid var(--info-border);
+    border-left-width: 5px;
+    border-radius: 7px;
+    box-shadow: 0 7px 18px rgba(47, 30, 21, 0.1);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.55;
+    text-align: left;
+}
+
+.auth-message::before,
+.payment-status-message::before,
+.payment-inline-message::before,
+.form-error::before {
+    content: "i";
+    display: grid;
+    flex: 0 0 25px;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    margin-top: 1px;
+    color: #fffaf0;
+    background: var(--gold);
+    border-radius: 50%;
+    font-family: Georgia, serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.auth-message[data-type="success"],
+.payment-status-message[data-type="success"],
+.payment-inline-message[data-type="success"] {
+    color: var(--green-dark);
+    background: var(--green-soft);
+    border-color: var(--green-border);
+}
+
+.auth-message[data-type="success"]::before,
+.payment-status-message[data-type="success"]::before,
+.payment-inline-message[data-type="success"]::before {
+    content: "✓";
+    background: var(--green);
+}
+
+.auth-message[data-type="error"],
+.payment-status-message[data-type="error"],
+.payment-inline-message[data-type="error"],
+.form-error {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: var(--danger-border);
+}
+
+.auth-message[data-type="error"]::before,
+.payment-status-message[data-type="error"]::before,
+.payment-inline-message[data-type="error"]::before,
+.form-error::before {
+    content: "!";
+    background: var(--danger);
+}
+
+.auth-message[data-type="info"],
+.payment-status-message[data-type="info"],
+.payment-inline-message[data-type="info"] {
+    color: var(--info-dark);
+    background: var(--info-soft);
+    border-color: var(--info-border);
+}
+
+@media (max-width: 560px) {
+    .auth-message,
+    .payment-status-message,
+    .payment-inline-message,
+    .form-error {
+        gap: 10px;
+        min-height: 50px;
+        padding: 13px 14px;
+        border-left-width: 4px;
+        font-size: 0.8125rem;
+    }
+
+    .auth-message::before,
+    .payment-status-message::before,
+    .payment-inline-message::before,
+    .form-error::before {
+        flex-basis: 23px;
+        width: 23px;
+        height: 23px;
+    }
+
+    .payment-status-message {
+        margin-top: 22px;
+        margin-bottom: 20px;
+    }
+}
+
 /* ========================================================================== 
    STRIPE CHECKOUT AND COMPLIMENTARY CODES
    ========================================================================== */
 
-.payment-status-message,
-.payment-inline-message {
+.payment-status-message {
     width: min(100%, 760px);
-    margin: 0 auto 20px;
-    padding: 13px 15px;
-    border: 1px solid rgba(76, 49, 32, 0.28);
-    border-radius: 4px;
-    color: var(--ink);
-    background: rgba(255, 250, 235, 0.9);
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1.5;
-    text-align: center;
+    margin: 28px auto 24px;
 }
 
-.payment-status-message[data-type="success"],
-.payment-inline-message[data-type="success"] {
-    color: #24412d;
-    background: #edf5e9;
-    border-color: #7e9b7f;
-}
-
-.payment-status-message[data-type="error"],
-.payment-inline-message[data-type="error"] {
-    color: #68151f;
-    background: #fbe8df;
-    border-color: #b36a71;
-}
-
-.payment-status-message[data-type="info"],
-.payment-inline-message[data-type="info"] {
-    color: #4a3a2f;
-    background: #f7edcf;
-    border-color: #b79555;
+.payment-inline-message {
+    width: 100%;
+    margin: 8px 0 0;
 }
 
 .unlock-choice-panel {
@@ -3101,11 +3189,6 @@ p {
     white-space: nowrap;
 }
 
-.payment-inline-message {
-    width: 100%;
-    margin: 2px 0 0;
-    text-align: left;
-}
 
 .locked-overlay #payment-note {
     display: block;
@@ -3351,7 +3434,7 @@ p {
         linear-gradient(rgba(255, 250, 236, 0.94), rgba(247, 236, 205, 0.97)),
         var(--paper-light);
     border: 1px solid rgba(72, 47, 31, 0.38);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-large);
 }
 
 .legal-document::before {
@@ -3458,6 +3541,39 @@ p {
     color: #ffd98c;
 }
 
+.legal-body .header-inner {
+    min-height: 88px;
+}
+
+.legal-return-button {
+    flex: 0 0 auto;
+    min-width: 176px;
+    min-height: 50px;
+    padding: 11px 18px;
+    color: #fff8e6;
+    background: linear-gradient(180deg, #7c3040, #571d2a);
+    border: 2px solid var(--gold-light);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 236, 190, 0.13),
+        0 7px 16px rgba(38, 17, 22, 0.24);
+    text-shadow: 0 1px 1px rgba(28, 10, 14, 0.45);
+}
+
+.legal-return-button:hover {
+    color: #fffdf5;
+    background: linear-gradient(180deg, #8c394c, #651f30);
+    border-color: #f0cf78;
+}
+
+.legal-bottom-return-button {
+    min-width: 250px;
+}
+
+.legal-back-row > a,
+.legal-back-row > button {
+    min-height: 56px;
+}
+
 @media (max-width: 760px) {
     .reading-consent-panel {
         padding: 18px 15px;
@@ -3490,6 +3606,53 @@ p {
 
     .legal-nav-links {
         display: none;
+    }
+
+    .legal-body .header-inner {
+        min-height: 76px;
+        gap: 12px;
+    }
+
+    .legal-return-button {
+        min-width: 138px;
+        min-height: 46px;
+        padding: 9px 12px;
+        font-size: 0.8125rem;
+    }
+
+    .legal-back-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .legal-back-row > a,
+    .legal-back-row > button,
+    .legal-bottom-return-button {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 460px) {
+    .legal-body .header-inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .legal-body .brand-copy small {
+        display: none;
+    }
+
+    .legal-body .brand-copy strong {
+        font-size: 1.125rem;
+    }
+
+    .legal-return-button {
+        min-width: 112px;
+        max-width: 122px;
+        padding: 8px 9px;
+        font-size: 0.75rem;
+        line-height: 1.25;
     }
 }
 

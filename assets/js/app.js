@@ -5,7 +5,7 @@
         siteName: "The Marriage Oracle",
         priceText: "£0.99",
         paymentLink: "",
-        demoMode: true
+        demoMode: false
     });
 
     const STORAGE_KEYS = Object.freeze({

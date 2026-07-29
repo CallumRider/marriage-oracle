@@ -12,14 +12,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 
-   <link rel="stylesheet" href="assets/css/style.css?v=20260728-payments">
+   <link rel="stylesheet" href="assets/css/style.css?v=20260729-account-deletion">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8/dist/umd/supabase.min.js" defer></script>
 <script src="assets/js/supabase-config.js" defer></script>
 <script src="assets/js/app.js?v=20260729-payment-final-v3" defer></script>
 <script src="assets/js/quiz.js" defer></script>
 <script src="assets/js/portraits.js" defer></script>
-<script src="assets/js/auth.js?v=20260729-payment-final-v3" defer></script>
+<script src="assets/js/auth.js?v=20260729-account-deletion" defer></script>
 <script src="assets/js/results.js" defer></script>
 <script src="assets/js/payments.js?v=20260729-payment-final-v3" defer></script>
 </head>
@@ -593,6 +593,28 @@
                         aria-live="polite"
                         hidden
                     ></p>
+
+                    <section
+                        class="account-danger-zone"
+                        aria-labelledby="delete-account-heading"
+                    >
+                        <div>
+                            <p class="account-eyebrow">Account controls</p>
+                            <h3 id="delete-account-heading">Delete account</h3>
+                            <p>
+                                Permanently remove your account, profile and every
+                                saved reading from The Marriage Oracle.
+                            </p>
+                        </div>
+
+                        <button
+                            id="open-delete-account-button"
+                            class="danger-button compact-button"
+                            type="button"
+                        >
+                            Delete My Account
+                        </button>
+                    </section>
                 </section>
 
                 <p class="small-note account-privacy-note">
@@ -1209,6 +1231,90 @@
                 <button class="primary-button" type="submit">
                     Save New Password
                 </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- DELETE ACCOUNT POP-UP -->
+
+    <div
+        id="delete-account-dialog"
+        class="dialog-backdrop"
+        hidden
+    >
+        <div
+            class="dialog-card delete-account-dialog-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-dialog-title"
+            aria-describedby="delete-account-dialog-description"
+        >
+            <p class="kicker">Permanent action</p>
+            <h2 id="delete-account-dialog-title">Delete your account?</h2>
+
+            <p id="delete-account-dialog-description">
+                This cannot be undone. Your account, profile and saved readings
+                will be permanently removed.
+            </p>
+
+            <ul class="deletion-list">
+                <li>You will no longer be able to sign in with this account.</li>
+                <li>Paid and complimentary readings saved to it will be removed.</li>
+                <li>Stripe may retain payment records required for financial administration.</li>
+            </ul>
+
+            <form id="delete-account-form" class="auth-form" novalidate>
+                <label for="delete-account-password">Confirm your password</label>
+                <input
+                    id="delete-account-password"
+                    class="text-input"
+                    type="password"
+                    minlength="8"
+                    maxlength="128"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <label for="delete-account-confirmation">
+                    Type <strong>DELETE</strong> to confirm
+                </label>
+                <input
+                    id="delete-account-confirmation"
+                    class="text-input"
+                    type="text"
+                    maxlength="10"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    spellcheck="false"
+                    placeholder="DELETE"
+                    required
+                >
+
+                <p
+                    id="delete-account-message"
+                    class="auth-message"
+                    role="status"
+                    aria-live="polite"
+                    hidden
+                ></p>
+
+                <div class="dialog-actions">
+                    <button
+                        id="cancel-delete-account-button"
+                        class="secondary-button"
+                        type="button"
+                    >
+                        Keep My Account
+                    </button>
+
+                    <button
+                        class="danger-button"
+                        type="submit"
+                    >
+                        Permanently Delete Account
+                    </button>
+                </div>
             </form>
         </div>
     </div>

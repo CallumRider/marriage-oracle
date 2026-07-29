@@ -13,13 +13,21 @@
         profile: null,
         readings: [],
         activeReadingId: null,
+        currentReadingId: null,
         syncTimer: null,
         syncChain: Promise.resolve(),
         authSubscription: null,
         initialised: false,
         configured: false,
-        handlingSessionFor: null
+        handlingSessionFor: null,
+        readyResolved: false,
+        readyResolve: null,
+        readyPromise: null
     };
+
+    account.readyPromise = new Promise((resolve) => {
+        account.readyResolve = resolve;
+    });
 
     const ui = {};
 
@@ -79,6 +87,11 @@
             App.storageKeys.activeReadingId,
             null
         );
+        account.currentReadingId = App.storage.readText(
+            "localStorage",
+            App.storageKeys.currentReadingId,
+            null
+        );
 
         account.configured = initialiseSupabaseClient();
 
@@ -89,6 +102,7 @@
                 "error"
             );
             setAccountFormsDisabled(true);
+            resolveReady();
             return;
         }
 
@@ -182,6 +196,8 @@
                 "We could not check your account. Check your connection and try again, or continue as a guest.",
                 "error"
             );
+            resolveReady();
+            dispatchAuthState(false);
         }
     }
 
@@ -195,8 +211,10 @@
             account.profile = null;
             account.readings = [];
             account.activeReadingId = null;
+            account.currentReadingId = null;
             account.handlingSessionFor = null;
             App.storage.removeStoredValue("localStorage", App.storageKeys.activeReadingId);
+            App.storage.removeStoredValue("localStorage", App.storageKeys.currentReadingId);
 
             if (App.state.profile.mode === "account") {
                 App.state.profile = { mode: "guest", name: "", email: "" };
@@ -205,6 +223,8 @@
 
             showSignedOutState();
             updateHeaderAccountButton();
+            resolveReady();
+            dispatchAuthState(false);
             return;
         }
 
@@ -213,6 +233,8 @@
 
         if (account.handlingSessionFor === sessionKey && event !== "USER_UPDATED") {
             showDashboardState();
+            resolveReady();
+            dispatchAuthState(true);
             return;
         }
 
@@ -222,6 +244,8 @@
         await loadReadings();
         showDashboardState();
         updateHeaderAccountButton();
+        resolveReady();
+        dispatchAuthState(true);
     }
 
     async function loadProfile() {
@@ -280,7 +304,7 @@
 
         const { data, error } = await account.client
             .from("readings")
-            .select("id, status, current_question_index, result, created_at, updated_at, completed_at")
+            .select("id, status, current_question_index, result, access_status, unlocked_at, unlock_source, created_at, updated_at, completed_at")
             .order("updated_at", { ascending: false })
             .limit(MAX_SAVED_READINGS);
 
@@ -568,7 +592,9 @@
         try {
             App.clearQuizProgress();
             account.activeReadingId = null;
+            account.currentReadingId = null;
             persistActiveReadingId();
+            persistCurrentReadingId();
 
             App.state.answers = App.state.profile.name
                 ? { firstName: App.state.profile.name }
@@ -656,14 +682,16 @@
 
         const { data, error } = await account.client
             .from("readings")
-            .select("id, status, current_question_index, answers, result, created_at, updated_at, completed_at")
+            .select("id, status, current_question_index, answers, result, access_status, unlocked_at, unlock_source, created_at, updated_at, completed_at")
             .eq("id", readingId)
             .single();
 
         if (error) throw error;
 
         account.activeReadingId = data.status === "in_progress" ? data.id : null;
+        account.currentReadingId = data.id;
         persistActiveReadingId();
+        persistCurrentReadingId();
 
         App.state.answers = isPlainObject(data.answers) ? data.answers : {};
         App.state.currentQuestionIndex = clampQuestionIndex(data.current_question_index);
@@ -673,7 +701,7 @@
 
         if (data.status === "completed" && App.state.finalResult) {
             App.modules.results.displayResult(App.state.finalResult);
-            App.modules.payments.lockPremiumReading();
+            App.modules.payments.applyAccessStatus(data.access_status, data.unlock_source);
             App.showScreen("result");
             return;
         }
@@ -700,6 +728,10 @@
             if (account.activeReadingId === readingId) {
                 account.activeReadingId = null;
                 persistActiveReadingId();
+            }
+            if (account.currentReadingId === readingId) {
+                account.currentReadingId = null;
+                persistCurrentReadingId();
             }
 
             await loadReadings();
@@ -791,7 +823,6 @@
         const result = completedResult === undefined ? null : completedResult;
         const isCompleted = Boolean(result);
         const payload = {
-            user_id: account.user.id,
             status: isCompleted ? "completed" : "in_progress",
             current_question_index: clampQuestionIndex(App.state.currentQuestionIndex),
             answers: sanitiseJsonObject(App.state.answers),
@@ -802,11 +833,13 @@
         if (!account.activeReadingId) {
             const { data, error } = await account.client
                 .from("readings")
-                .insert(payload)
+                .insert({ ...payload, user_id: account.user.id })
                 .select("id")
                 .single();
 
             if (error) throw error;
+            account.currentReadingId = data.id;
+            persistCurrentReadingId();
             account.activeReadingId = isCompleted ? null : data.id;
             if (isCompleted) {
                 App.storage.removeStoredValue("localStorage", App.storageKeys.activeReadingId);
@@ -815,6 +848,8 @@
             }
         } else {
             const readingId = account.activeReadingId;
+            account.currentReadingId = readingId;
+            persistCurrentReadingId();
             const { error } = await account.client
                 .from("readings")
                 .update(payload)
@@ -857,7 +892,9 @@
         if (error) throw error;
 
         account.activeReadingId = data.id;
+        account.currentReadingId = data.id;
         persistActiveReadingId();
+        persistCurrentReadingId();
         return data.id;
     }
 
@@ -865,6 +902,77 @@
         window.clearTimeout(account.syncTimer);
         account.activeReadingId = null;
         persistActiveReadingId();
+    }
+
+    function persistCurrentReadingId() {
+        if (account.currentReadingId) {
+            App.storage.writeText(
+                "localStorage",
+                App.storageKeys.currentReadingId,
+                account.currentReadingId
+            );
+        } else {
+            App.storage.removeStoredValue(
+                "localStorage",
+                App.storageKeys.currentReadingId
+            );
+        }
+    }
+
+    async function ensureCurrentCompletedReading() {
+        if (!account.user || App.state.profile.mode !== "account") {
+            return null;
+        }
+
+        window.clearTimeout(account.syncTimer);
+        await account.syncChain.catch(() => undefined);
+
+        if (App.state.finalResult) {
+            const knownReading = account.currentReadingId
+                ? account.readings.find((item) => item.id === account.currentReadingId)
+                : null;
+
+            const sameResult = knownReading?.result?.reference
+                && knownReading.result.reference === App.state.finalResult.reference;
+
+            if (!knownReading || knownReading.status !== "completed" || !sameResult) {
+                account.currentReadingId = account.activeReadingId || null;
+                persistCurrentReadingId();
+                await enqueueSync(() => syncProgress(App.state.finalResult));
+            }
+        }
+
+        return account.currentReadingId;
+    }
+
+    async function refreshCurrentReadingAccess() {
+        if (!account.user || !account.currentReadingId) return null;
+
+        const { data, error } = await account.client
+            .from("readings")
+            .select("id, access_status, unlock_source, unlocked_at")
+            .eq("id", account.currentReadingId)
+            .single();
+
+        if (error) throw error;
+        App.modules.payments.applyAccessStatus(data.access_status, data.unlock_source);
+        return data;
+    }
+
+    function waitUntilReady() {
+        return account.readyPromise;
+    }
+
+    function resolveReady() {
+        if (account.readyResolved) return;
+        account.readyResolved = true;
+        account.readyResolve?.();
+    }
+
+    function dispatchAuthState(signedIn) {
+        document.dispatchEvent(new CustomEvent("marriage-oracle:auth-state", {
+            detail: { signedIn, userId: account.user?.id || null }
+        }));
     }
 
     async function updateFirstName(name) {
@@ -929,8 +1037,13 @@
         main.className = "saved-reading-copy";
 
         const status = document.createElement("span");
-        status.className = `reading-status reading-status-${reading.status}`;
-        status.textContent = reading.status === "completed" ? "Completed" : "In progress";
+        const isUnlocked = reading.status === "completed" && reading.access_status !== "locked";
+        status.className = `reading-status reading-status-${isUnlocked ? "unlocked" : reading.status}`;
+        status.textContent = isUnlocked
+            ? "Unlocked"
+            : reading.status === "completed"
+                ? "Completed"
+                : "In progress";
 
         const title = document.createElement("h4");
         title.textContent = getReadingTitle(reading);
@@ -982,7 +1095,12 @@
         const result = isPlainObject(reading.result) ? reading.result : null;
 
         if (reading.status === "completed" && result) {
-            return `${result.generatedFor || "Your"} reading · ${result.compatibility || "—"}% compatibility · ${date}`;
+            const access = reading.access_status === "paid"
+                ? "Paid unlock"
+                : reading.access_status === "promo"
+                    ? "Complimentary unlock"
+                    : "Preview only";
+            return `${result.generatedFor || "Your"} reading · ${result.compatibility || "—"}% compatibility · ${access} · ${date}`;
         }
 
         return `Last saved ${date}`;
@@ -1253,6 +1371,11 @@
         flushProgressSync,
         saveCompletedReading,
         clearActiveReading,
+        ensureCurrentCompletedReading,
+        refreshCurrentReadingAccess,
+        openReading: resumeReading,
+        refreshReadings: loadReadings,
+        waitUntilReady,
         updateFirstName,
         isValidEmail,
         cleanEmail,
@@ -1262,6 +1385,12 @@
         },
         get user() {
             return account.user;
+        },
+        get currentReadingId() {
+            return account.currentReadingId;
+        },
+        get configured() {
+            return account.configured;
         }
     };
 })();

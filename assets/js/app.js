@@ -4,8 +4,14 @@
     const CONFIG = Object.freeze({
         siteName: "The Marriage Oracle",
         priceText: "£0.99",
-        paymentLink: "",
-        demoMode: false
+        pricePence: 99,
+        currency: "gbp",
+        demoMode: false,
+        paymentFunctions: Object.freeze({
+            createCheckout: "create-checkout-session",
+            verifyPayment: "verify-payment",
+            redeemPromo: "redeem-promo"
+        })
     });
 
     const STORAGE_KEYS = Object.freeze({
@@ -15,6 +21,8 @@
         questionIndex: "marriageOracleQuestionIndexV2",
         result: "marriageOracleResultV2",
         activeReadingId: "marriageOracleActiveReadingIdV1",
+        currentReadingId: "marriageOracleCurrentReadingIdV1",
+        pendingUnlock: "marriageOraclePendingUnlockV1",
         awaitingPayment: "marriageOracleAwaitingPayment"
     });
 
@@ -99,6 +107,11 @@
             printButton: byId("print-button"),
             restartButton: byId("restart-button"),
             paymentNote: byId("payment-note"),
+            paymentStatusMessage: byId("payment-status-message"),
+            promoForm: byId("promo-code-form"),
+            promoInput: byId("promo-code-input"),
+            promoSubmitButton: byId("promo-code-submit"),
+            promoMessage: byId("promo-code-message"),
             priceBadge: byId("price-badge")
         });
     }
@@ -264,6 +277,8 @@
         removeStoredValue("localStorage", STORAGE_KEYS.questionIndex);
         removeStoredValue("localStorage", STORAGE_KEYS.result);
         removeStoredValue("sessionStorage", STORAGE_KEYS.awaitingPayment);
+        removeStoredValue("sessionStorage", STORAGE_KEYS.pendingUnlock);
+        removeStoredValue("localStorage", STORAGE_KEYS.currentReadingId);
 
         state.currentQuestionIndex = 0;
         state.answers = {};
@@ -430,7 +445,7 @@
         if (elements.paymentNote) {
             elements.paymentNote.textContent = CONFIG.demoMode
                 ? "Testing mode is active. No payment will be taken."
-                : "You will be sent to our secure payment page.";
+                : "Secure checkout by Stripe. You must be signed in so the unlock can be saved to your account.";
         }
     }
 

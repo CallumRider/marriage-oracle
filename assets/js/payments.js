@@ -8,12 +8,19 @@
     let revealTimerOne = null;
     let revealTimerTwo = null;
     let processingReturn = false;
+    const PURCHASE_CONSENT_VERSION = "2026-07-30";
+
+    function purchaseConsentCheckbox() {
+        return document.getElementById("purchase-consent-checkbox");
+    }
 
     function init() {
         if (initialised) return;
         initialised = true;
 
         App.elements.unlockButton?.addEventListener("click", handleUnlock);
+        purchaseConsentCheckbox()?.addEventListener("change", syncPurchaseConsent);
+        syncPurchaseConsent();
         App.elements.promoForm?.addEventListener("submit", redeemPromoCode);
         App.elements.shareButton?.addEventListener("click", shareReading);
         App.elements.emailButton?.addEventListener("click", emailReading);
@@ -39,6 +46,16 @@
     async function handleUnlock() {
         hidePaymentStatus();
         hidePromoMessage();
+
+        const consent = purchaseConsentCheckbox();
+        if (!consent?.checked) {
+            showPaymentStatus(
+                "Tick the immediate-access and cancellation acknowledgement before continuing to secure checkout.",
+                "error"
+            );
+            consent?.focus();
+            return;
+        }
 
         if (App.config.demoMode) {
             unlockPremiumReading();
@@ -79,7 +96,12 @@
 
             const { data, error } = await auth.client.functions.invoke(
                 App.config.paymentFunctions.createCheckout,
-                { body: { readingId } }
+                {
+                    body: {
+                        readingId,
+                        purchaseConsentVersion: PURCHASE_CONSENT_VERSION
+                    }
+                }
             );
 
             if (error) throw error;
@@ -110,6 +132,7 @@
             );
         } finally {
             setButtonBusy(App.elements.unlockButton, false);
+            syncPurchaseConsent();
         }
     }
 
@@ -318,6 +341,10 @@
     }
 
     function lockPremiumReading() {
+        const consent = purchaseConsentCheckbox();
+        if (consent) consent.checked = false;
+        syncPurchaseConsent();
+
         App.elements.premiumReading?.classList.add("locked");
         App.elements.premiumReading?.classList.remove("unlocked");
 
@@ -513,6 +540,17 @@
             return "This completed reading could not be found on your account.";
         }
         return "That complimentary code is invalid, expired or has reached its usage limit.";
+    }
+
+
+    function syncPurchaseConsent() {
+        const button = App.elements.unlockButton;
+        const consent = purchaseConsentCheckbox();
+        if (!button || !consent) return;
+
+        if (button.dataset.originalText) return;
+        button.disabled = !consent.checked;
+        button.setAttribute("aria-disabled", String(!consent.checked));
     }
 
     function setButtonBusy(button, busy, busyText = "Working…") {

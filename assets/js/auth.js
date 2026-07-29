@@ -79,7 +79,11 @@
             deleteAccountPassword: byId("delete-account-password"),
             deleteAccountConfirmation: byId("delete-account-confirmation"),
             deleteAccountMessage: byId("delete-account-message"),
-            cancelDeleteAccountButton: byId("cancel-delete-account-button")
+            cancelDeleteAccountButton: byId("cancel-delete-account-button"),
+            readingAgeConfirmation: byId("reading-age-confirmation"),
+            readingSensitiveConsent: byId("reading-sensitive-consent"),
+            readingConsentMessage: byId("reading-consent-message"),
+            signUpLegalConsent: byId("sign-up-legal-consent")
         });
     }
 
@@ -392,6 +396,9 @@
     }
 
     function continueAsGuest() {
+        hideReadingConsentMessage();
+        if (!validateReadingConsent()) return;
+
         account.activeReadingId = null;
         App.storage.removeStoredValue("localStorage", App.storageKeys.activeReadingId);
         App.state.profile = { mode: "guest", name: "", email: "" };
@@ -459,6 +466,7 @@
         const email = cleanEmail(ui.signUpEmail?.value || "");
         const password = String(ui.signUpPassword?.value || "");
         const confirmation = String(ui.signUpPasswordConfirm?.value || "");
+        const acceptedLegalTerms = Boolean(ui.signUpLegalConsent?.checked);
 
         if (!name) {
             showAuthMessage("Please enter your first name.", "error");
@@ -481,6 +489,15 @@
         if (password !== confirmation) {
             showAuthMessage("The two passwords do not match.", "error");
             ui.signUpPasswordConfirm?.focus();
+            return;
+        }
+
+        if (!acceptedLegalTerms) {
+            showAuthMessage(
+                "Confirm that you are 18 or over and accept the Terms of Use before creating an account.",
+                "error"
+            );
+            ui.signUpLegalConsent?.focus();
             return;
         }
 
@@ -730,6 +747,9 @@
 
     async function startNewReading() {
         hideDashboardMessage();
+        hideReadingConsentMessage();
+        if (!validateReadingConsent()) return;
+
         setButtonBusy(ui.newReadingButton, true, "Preparing…");
 
         try {
@@ -756,6 +776,9 @@
     }
 
     async function resumeLatestReading() {
+        hideReadingConsentMessage();
+        if (!validateReadingConsent()) return;
+
         const reading = account.readings.find(
             (item) => item.id === account.activeReadingId && item.status === "in_progress"
         ) || account.readings.find((item) => item.status === "in_progress");
@@ -849,6 +872,8 @@
             return;
         }
 
+        hideReadingConsentMessage();
+        if (!validateReadingConsent()) return;
         beginOrResumeQuiz();
     }
 
@@ -1323,6 +1348,40 @@
             "aria-label",
             account.user ? "Open your account" : "Sign in or create an account"
         );
+    }
+
+
+    function validateReadingConsent() {
+        if (!ui.readingAgeConfirmation?.checked) {
+            showReadingConsentMessage(
+                "Confirm that you are 18 or over and accept the Terms of Use before beginning or resuming a reading.",
+                "error"
+            );
+            ui.readingAgeConfirmation?.focus();
+            ui.readingConsentMessage?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return false;
+        }
+
+        if (!ui.readingSensitiveConsent?.checked) {
+            showReadingConsentMessage(
+                "Explicit consent is required before optional identity, preference and beliefs answers can be processed for a personalised reading.",
+                "error"
+            );
+            ui.readingSensitiveConsent?.focus();
+            ui.readingConsentMessage?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return false;
+        }
+
+        hideReadingConsentMessage();
+        return true;
+    }
+
+    function showReadingConsentMessage(message, type = "info") {
+        showMessage(ui.readingConsentMessage, message, type);
+    }
+
+    function hideReadingConsentMessage() {
+        hideMessage(ui.readingConsentMessage);
     }
 
     function showAuthMessage(message, type = "info") {

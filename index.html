@@ -12,16 +12,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 
-   <link rel="stylesheet" href="assets/css/style.css?v=20260729-account-deletion">
+   <link rel="stylesheet" href="assets/css/style.css?v=20260730-launch-legal">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8/dist/umd/supabase.min.js" defer></script>
 <script src="assets/js/supabase-config.js" defer></script>
 <script src="assets/js/app.js?v=20260729-payment-final-v3" defer></script>
 <script src="assets/js/quiz.js" defer></script>
 <script src="assets/js/portraits.js" defer></script>
-<script src="assets/js/auth.js?v=20260729-account-deletion" defer></script>
+<script src="assets/js/auth.js?v=20260730-launch-legal" defer></script>
 <script src="assets/js/results.js" defer></script>
-<script src="assets/js/payments.js?v=20260729-payment-final-v3" defer></script>
+<script src="assets/js/payments.js?v=20260730-launch-legal" defer></script>
 </head>
 <body>
     <div class="paper-noise" aria-hidden="true"></div>
@@ -337,6 +337,40 @@
                     </p>
                 </div>
 
+
+                <section class="reading-consent-panel" aria-labelledby="reading-consent-title">
+                    <div>
+                        <p class="kicker">Required before a reading</p>
+                        <h3 id="reading-consent-title">Your choices and consent</h3>
+                        <p>
+                            The service is for adults and creates fictional entertainment results.
+                            Some optional answers may reveal identity, relationship preference,
+                            portrait-background preference, or beliefs and traditions.
+                        </p>
+                    </div>
+
+                    <label class="legal-check-row" for="reading-age-confirmation">
+                        <input id="reading-age-confirmation" type="checkbox">
+                        <span>
+                            I confirm that I am 18 or over, understand this is entertainment only,
+                            and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a>.
+                        </span>
+                    </label>
+
+                    <label class="legal-check-row" for="reading-sensitive-consent">
+                        <input id="reading-sensitive-consent" type="checkbox">
+                        <span>
+                            I explicitly consent to the processing of the optional personal and
+                            potentially sensitive answers I choose to provide so my reading can be
+                            generated and, when signed in, saved to my account. I can select
+                            “Prefer not to say” and delete saved readings at any time.
+                            See the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>.
+                        </span>
+                    </label>
+
+                    <p id="reading-consent-message" class="auth-message" role="status" aria-live="polite" hidden></p>
+                </section>
+
                 <div id="auth-loading-panel" class="account-loading-panel" aria-live="polite">
                     <span class="account-loading-seal" aria-hidden="true">M</span>
                     <p>Checking your account…</p>
@@ -480,6 +514,17 @@
                                 required
                                 placeholder="Type the password again"
                             >
+
+
+                            <label class="legal-check-row compact-legal-check" for="sign-up-legal-consent">
+                                <input id="sign-up-legal-consent" type="checkbox">
+                                <span>
+                                    I confirm I am 18 or over, agree to the
+                                    <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a>,
+                                    and have read the
+                                    <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>.
+                                </span>
+                            </label>
 
                             <button class="primary-button" type="submit">
                                 Create My Account
@@ -1040,7 +1085,27 @@
                             <p>Unlock the age-matched name, life-stage clue, personality, values, appearance, meeting story, relationship style, affection pattern, timing and future-life reading.</p>
 
                             <div class="unlock-choice-panel">
-                                <button id="unlock-button" class="primary-button unlock-payment-button" type="button">Unlock Full Reading — £0.99</button>
+
+                                <div class="purchase-summary" aria-label="Purchase summary">
+                                    <div>
+                                        <span>One completed digital reading</span>
+                                        <strong>£0.99 total</strong>
+                                    </div>
+                                    <small>One-off payment · no subscription · permanent access on this account</small>
+                                </div>
+
+                                <label class="legal-check-row purchase-consent-row" for="purchase-consent-checkbox">
+                                    <input id="purchase-consent-checkbox" type="checkbox">
+                                    <span>
+                                        I request immediate access to this digital reading and understand
+                                        that once access begins I lose my 14-day right to cancel. My legal
+                                        rights still apply if the digital content is faulty or not as described.
+                                        I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a>
+                                        and <a href="refunds.html" target="_blank" rel="noopener">Refund Policy</a>.
+                                    </span>
+                                </label>
+
+                                <button id="unlock-button" class="primary-button unlock-payment-button" type="button" disabled>Pay £0.99 &amp; Unlock Reading</button>
 
                                 <div class="unlock-divider" aria-hidden="true">
                                     <span>or</span>
@@ -1067,7 +1132,7 @@
                                 </form>
                             </div>
 
-                            <small id="payment-note">Secure checkout by Stripe. Sign-in is required so the unlock remains attached to your account.</small>
+                            <small id="payment-note">Secure checkout by Stripe. Sign-in is required so the unlock remains attached to your account. A payment receipt is sent to your account email.</small>
                         </div>
                     </div>
                 </section>
@@ -1106,8 +1171,11 @@
 
             <div class="footer-links">
                 <a href="#how-it-works">How it works</a>
-                <a href="#reading-includes">Reading details</a>
-                <a href="#questions">Questions</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="refunds.html">Refunds</a>
+                <a href="cookies.html">Storage &amp; cookies</a>
+                <a href="mailto:marrigeoraclecustomerservice@gmail.com">Customer service</a>
 
                 <button
                     id="footer-start-button"
@@ -1128,8 +1196,16 @@
             </p>
 
             <p>
-                © <span id="current-year"></span>
-                The Marriage Oracle.
+                Operated by Callum Rider, with legal guardian Samantha Harding.
+                Customer service: <a href="mailto:marrigeoraclecustomerservice@gmail.com">marrigeoraclecustomerservice@gmail.com</a>.
+            </p>
+
+            <p>
+                Correspondence address: 86 Kings Acre, Coggeshall, United Kingdom.
+            </p>
+
+            <p>
+                © <span id="current-year"></span> The Marriage Oracle.
             </p>
         </div>
     </footer>

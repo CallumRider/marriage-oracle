@@ -1,0 +1,48 @@
+THE MARRIAGE ORACLE — FINAL PUBLIC LAUNCH CHECKLIST
+==================================================
+
+BUSINESS
+[ ] Samantha Harding has reviewed and approved the public operator details.
+[ ] Full correspondence address and postcode are displayed.
+[ ] HMRC/self-employment and record-keeping obligations have been checked.
+[ ] Stripe identity, bank, guardian, public details, and payout settings are complete.
+
+WEBSITE
+[ ] Privacy, Terms, Refunds, and Storage/Cookies pages are live.
+[ ] The site clearly says readings are fictional entertainment.
+[ ] Price is clearly shown as £0.99 total, one-off, no subscription.
+[ ] Terms are printable/saveable and linked before account creation and payment.
+[ ] Adult and sensitive-data consent controls work.
+[ ] Immediate digital-content consent is required before checkout.
+[ ] Support email and correspondence address are correct.
+
+PAYMENTS
+[ ] Live Stripe key and live webhook secret are active in Supabase.
+[ ] SITE_URL is https://callumrider.github.io/marriage-oracle/
+[ ] ALLOWED_ORIGINS includes https://callumrider.github.io
+[ ] create-checkout-session uses the supplied final code.
+[ ] verify-payment, stripe-webhook, and redeem-promo use their real code, not Hello World.
+[ ] Stripe receipts arrive at the account email.
+[ ] Refund workflow has been tested in Stripe with a test/small live transaction.
+
+DATA & SECURITY
+[ ] Supabase Row Level Security remains enabled on profiles and readings.
+[ ] No sk_live_, service-role key, webhook secret, or private credential exists in GitHub.
+[ ] Account deletion is tested with a disposable account.
+[ ] Password reset and email confirmation links return to the correct site.
+[ ] Promo-code limits and rate limits are active.
+[ ] No optional analytics or advertising technologies are running without suitable controls.
+
+QUALITY
+[ ] Full 33-question journey tested signed out, signed in, paid, and promo.
+[ ] Chrome, Edge, Safari/iPhone, and Android-sized viewport checked.
+[ ] Keyboard-only navigation and visible focus checked.
+[ ] Reduced-motion mode checked.
+[ ] No console errors or failed network requests.
+[ ] Portrait paths and all age/background variants checked.
+
+AFTER LAUNCH
+[ ] Keep business income and expense records.
+[ ] Monitor Stripe disputes, refunds, and webhook failures.
+[ ] Review support inbox regularly.
+[ ] Review policies whenever providers, features, or data use changes.

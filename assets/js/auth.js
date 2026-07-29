@@ -6,6 +6,7 @@
 
     const ACCOUNT_SYNC_DELAY = 700;
     const MAX_SAVED_READINGS = 12;
+    const DELETE_ACCOUNT_FUNCTION = "delete-account";
 
     const account = {
         client: null,
@@ -22,7 +23,8 @@
         handlingSessionFor: null,
         readyResolved: false,
         readyResolve: null,
-        readyPromise: null
+        readyPromise: null,
+        deletingAccount: false
     };
 
     account.readyPromise = new Promise((resolve) => {
@@ -70,7 +72,14 @@
             recoveryForm: byId("password-recovery-form"),
             recoveryPassword: byId("recovery-password"),
             recoveryPasswordConfirm: byId("recovery-password-confirm"),
-            recoveryMessage: byId("password-recovery-message")
+            recoveryMessage: byId("password-recovery-message"),
+            openDeleteAccountButton: byId("open-delete-account-button"),
+            deleteAccountDialog: byId("delete-account-dialog"),
+            deleteAccountForm: byId("delete-account-form"),
+            deleteAccountPassword: byId("delete-account-password"),
+            deleteAccountConfirmation: byId("delete-account-confirmation"),
+            deleteAccountMessage: byId("delete-account-message"),
+            cancelDeleteAccountButton: byId("cancel-delete-account-button")
         });
     }
 
@@ -169,6 +178,18 @@
         ui.newReadingButton?.addEventListener("click", startNewReading);
         ui.refreshReadingsButton?.addEventListener("click", refreshAccountData);
         ui.readingsList?.addEventListener("click", handleReadingListClick);
+
+        ui.openDeleteAccountButton?.addEventListener("click", openDeleteAccountDialog);
+        ui.cancelDeleteAccountButton?.addEventListener("click", hideDeleteAccountDialog);
+        ui.deleteAccountForm?.addEventListener("submit", deleteAccount);
+        ui.deleteAccountDialog?.addEventListener("click", (event) => {
+            if (event.target === ui.deleteAccountDialog) hideDeleteAccountDialog();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !ui.deleteAccountDialog?.hidden) {
+                hideDeleteAccountDialog();
+            }
+        });
     }
 
     function subscribeToAuthChanges() {
@@ -583,6 +604,128 @@
         } finally {
             setButtonBusy(ui.signOutButton, false);
         }
+    }
+
+    function openDeleteAccountDialog() {
+        if (!account.user || !ui.deleteAccountDialog) return;
+
+        hideDeleteAccountMessage();
+        ui.deleteAccountForm?.reset();
+        ui.deleteAccountDialog.hidden = false;
+        window.setTimeout(() => ui.deleteAccountPassword?.focus(), 50);
+    }
+
+    function hideDeleteAccountDialog() {
+        if (!ui.deleteAccountDialog || account.deletingAccount) return;
+        ui.deleteAccountDialog.hidden = true;
+        ui.deleteAccountForm?.reset();
+        hideDeleteAccountMessage();
+    }
+
+    async function deleteAccount(event) {
+        event.preventDefault();
+        hideDeleteAccountMessage();
+
+        if (!account.client || !account.user || account.deletingAccount) return;
+
+        const password = String(ui.deleteAccountPassword?.value || "");
+        const confirmation = String(ui.deleteAccountConfirmation?.value || "").trim();
+        const email = cleanEmail(account.user.email || "");
+
+        if (password.length < 8) {
+            showDeleteAccountMessage("Enter your current account password.", "error");
+            ui.deleteAccountPassword?.focus();
+            return;
+        }
+
+        if (confirmation !== "DELETE") {
+            showDeleteAccountMessage("Type DELETE exactly as shown to continue.", "error");
+            ui.deleteAccountConfirmation?.focus();
+            return;
+        }
+
+        account.deletingAccount = true;
+        setFormBusy(ui.deleteAccountForm, true, "Deleting Account…");
+
+        try {
+            const { error: passwordError } = await account.client.auth.signInWithPassword({
+                email,
+                password
+            });
+            if (passwordError) {
+                throw new Error("The password was not recognised. Your account has not been deleted.");
+            }
+
+            const { data, error } = await account.client.functions.invoke(
+                DELETE_ACCOUNT_FUNCTION,
+                { body: { confirmation: "DELETE" } }
+            );
+
+            if (error) {
+                throw new Error(await readFunctionError(error));
+            }
+            if (!data?.ok) {
+                throw new Error(data?.error || "The account could not be deleted.");
+            }
+
+            await finishDeletedAccountSession();
+        } catch (error) {
+            showDeleteAccountMessage(humaniseError(error), "error");
+        } finally {
+            account.deletingAccount = false;
+            setFormBusy(ui.deleteAccountForm, false);
+        }
+    }
+
+    async function readFunctionError(error) {
+        try {
+            const response = error?.context;
+            if (response && typeof response.clone === "function") {
+                const body = await response.clone().json();
+                if (body?.error) return String(body.error);
+            }
+        } catch {
+            // Use the safe fallback below.
+        }
+
+        return "The account deletion service could not complete the request.";
+    }
+
+    async function finishDeletedAccountSession() {
+        window.clearTimeout(account.syncTimer);
+        account.syncTimer = null;
+        account.syncChain = Promise.resolve();
+
+        try {
+            await account.client.auth.signOut({ scope: "local" });
+        } catch {
+            // The Auth user has already been removed, so local cleanup continues.
+        }
+
+        account.user = null;
+        account.profile = null;
+        account.readings = [];
+        account.activeReadingId = null;
+        account.currentReadingId = null;
+        account.handlingSessionFor = null;
+
+        App.clearQuizProgress();
+        App.storage.removeStoredValue("localStorage", App.storageKeys.activeReadingId);
+        App.storage.removeStoredValue("localStorage", App.storageKeys.currentReadingId);
+        App.state.profile = { mode: "guest", name: "", email: "" };
+        App.saveProfile();
+
+        if (ui.deleteAccountDialog) ui.deleteAccountDialog.hidden = true;
+        ui.deleteAccountForm?.reset();
+        showSignedOutState();
+        updateHeaderAccountButton();
+        App.showScreen("profile");
+        showAuthView("sign-in", { keepMessage: true });
+        showAuthMessage(
+            "Your account and saved readings have been permanently deleted.",
+            "success"
+        );
+        dispatchAuthState(false);
     }
 
     async function startNewReading() {
@@ -1204,6 +1347,14 @@
 
     function hideRecoveryMessage() {
         hideMessage(ui.recoveryMessage);
+    }
+
+    function showDeleteAccountMessage(message, type = "info") {
+        showMessage(ui.deleteAccountMessage, message, type);
+    }
+
+    function hideDeleteAccountMessage() {
+        hideMessage(ui.deleteAccountMessage);
     }
 
     function showMessage(element, message, type) {

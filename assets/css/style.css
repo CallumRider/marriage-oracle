@@ -3357,7 +3357,7 @@ p {
 
 .legal-check-row a,
 .footer-disclosure a,
-.legal-document a {
+.legal-document a:not(.primary-button):not(.secondary-button) {
     color: var(--burgundy);
     font-weight: 700;
     text-underline-offset: 3px;
@@ -3516,11 +3516,11 @@ p {
 }
 
 .legal-back-row {
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    margin-top: 34px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: min(800px, 100%);
+    margin: 38px auto 0;
 }
 
 .legal-nav-links {
@@ -3565,13 +3565,28 @@ p {
     border-color: #f0cf78;
 }
 
-.legal-bottom-return-button {
-    min-width: 250px;
+.legal-document .legal-bottom-return-button,
+.legal-document .legal-bottom-return-button:visited {
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    color: #fff8e6;
+    background: linear-gradient(180deg, #7c3040, #5a1f2d);
+    border-color: #43141f;
+    text-shadow: 0 1px 1px rgba(28, 10, 14, 0.42);
+}
+
+.legal-document .legal-bottom-return-button:hover {
+    color: #fffdf5;
+    background: linear-gradient(180deg, #8d3849, #661f31);
 }
 
 .legal-back-row > a,
 .legal-back-row > button {
-    min-height: 56px;
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    margin: 0;
 }
 
 @media (max-width: 760px) {

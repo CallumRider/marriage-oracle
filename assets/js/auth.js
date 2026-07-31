@@ -79,11 +79,7 @@
             deleteAccountPassword: byId("delete-account-password"),
             deleteAccountConfirmation: byId("delete-account-confirmation"),
             deleteAccountMessage: byId("delete-account-message"),
-            cancelDeleteAccountButton: byId("cancel-delete-account-button"),
-            readingAgeConfirmation: byId("reading-age-confirmation"),
-            readingSensitiveConsent: byId("reading-sensitive-consent"),
-            readingConsentMessage: byId("reading-consent-message"),
-            signUpLegalConsent: byId("sign-up-legal-consent")
+            cancelDeleteAccountButton: byId("cancel-delete-account-button")
         });
     }
 
@@ -165,7 +161,11 @@
         });
 
         ui.accountButton?.addEventListener("click", openProfileScreen);
-        ui.guestButton?.addEventListener("click", continueAsGuest);
+
+        // Use one delegated click handler for the two main entry actions.
+        // This remains reliable if the account panel is re-rendered or restored
+        // from a mobile browser's back/forward cache.
+        document.addEventListener("click", handleEntryActionClick);
 
         ui.signInTab?.addEventListener("click", () => showAuthView("sign-in"));
         ui.signUpTab?.addEventListener("click", () => showAuthView("sign-up"));
@@ -179,7 +179,6 @@
 
         ui.signOutButton?.addEventListener("click", signOut);
         ui.resumeButton?.addEventListener("click", resumeLatestReading);
-        ui.newReadingButton?.addEventListener("click", startNewReading);
         ui.refreshReadingsButton?.addEventListener("click", refreshAccountData);
         ui.readingsList?.addEventListener("click", handleReadingListClick);
 
@@ -395,19 +394,54 @@
         }
     }
 
-    function continueAsGuest() {
-        hideReadingConsentMessage();
-        if (!validateReadingConsent()) return;
+    function handleEntryActionClick(event) {
+        const button = event.target.closest(
+            "#guest-button, #account-new-reading-button"
+        );
 
+        if (!button || button.disabled) return;
+
+        event.preventDefault();
+
+        if (button.id === "guest-button") {
+            continueAsGuest();
+            return;
+        }
+
+        startNewReading();
+    }
+
+    function continueAsGuest() {
+        hideAuthMessage();
         account.activeReadingId = null;
+        account.currentReadingId = null;
         App.storage.removeStoredValue("localStorage", App.storageKeys.activeReadingId);
+        App.storage.removeStoredValue("localStorage", App.storageKeys.currentReadingId);
         App.state.profile = { mode: "guest", name: "", email: "" };
         App.saveProfile();
-        beginOrResumeQuiz();
+
+        if (!beginOrResumeQuiz()) {
+            showAuthMessage(
+                "The quiz did not finish loading. Refresh the page and try again.",
+                "error"
+            );
+        }
     }
 
     function beginOrResumeQuiz() {
-        const questionCount = App.modules.quiz.questions.length;
+        const quiz = App.modules.quiz;
+
+        if (
+            !quiz
+            || !Array.isArray(quiz.questions)
+            || typeof quiz.renderQuestion !== "function"
+            || quiz.questions.length === 0
+        ) {
+            console.error("The quiz module is not ready.");
+            return false;
+        }
+
+        const questionCount = quiz.questions.length;
 
         if (
             !Number.isInteger(App.state.currentQuestionIndex)
@@ -418,7 +452,8 @@
         }
 
         App.showScreen("quiz");
-        App.modules.quiz.renderQuestion();
+        quiz.renderQuestion();
+        return true;
     }
 
     async function signIn(event) {
@@ -466,7 +501,6 @@
         const email = cleanEmail(ui.signUpEmail?.value || "");
         const password = String(ui.signUpPassword?.value || "");
         const confirmation = String(ui.signUpPasswordConfirm?.value || "");
-        const acceptedLegalTerms = Boolean(ui.signUpLegalConsent?.checked);
 
         if (!name) {
             showAuthMessage("Please enter your first name.", "error");
@@ -489,15 +523,6 @@
         if (password !== confirmation) {
             showAuthMessage("The two passwords do not match.", "error");
             ui.signUpPasswordConfirm?.focus();
-            return;
-        }
-
-        if (!acceptedLegalTerms) {
-            showAuthMessage(
-                "Confirm that you are 18 or over and accept the Terms of Use before creating an account.",
-                "error"
-            );
-            ui.signUpLegalConsent?.focus();
             return;
         }
 
@@ -746,39 +771,51 @@
     }
 
     async function startNewReading() {
-        hideDashboardMessage();
-        hideReadingConsentMessage();
-        if (!validateReadingConsent()) return;
+        if (!account.user || ui.newReadingButton?.disabled) return;
 
+        hideDashboardMessage();
         setButtonBusy(ui.newReadingButton, true, "Preparing…");
 
+        App.clearQuizProgress();
+        account.activeReadingId = null;
+        account.currentReadingId = null;
+        persistActiveReadingId();
+        persistCurrentReadingId();
+
+        App.state.answers = App.state.profile.name
+            ? { firstName: App.state.profile.name }
+            : {};
+        App.state.currentQuestionIndex = 0;
+        App.state.finalResult = null;
+
+        // Open the quiz immediately. On a slower phone connection the old
+        // version waited for Supabase first, which made the button appear dead.
+        if (!beginOrResumeQuiz()) {
+            setButtonBusy(ui.newReadingButton, false);
+            showDashboardMessage(
+                "The quiz did not finish loading. Refresh the page and try again.",
+                "error"
+            );
+            return;
+        }
+
         try {
-            App.clearQuizProgress();
-            account.activeReadingId = null;
-            account.currentReadingId = null;
-            persistActiveReadingId();
-            persistCurrentReadingId();
-
-            App.state.answers = App.state.profile.name
-                ? { firstName: App.state.profile.name }
-                : {};
-            App.state.currentQuestionIndex = 0;
-            App.state.finalResult = null;
-
             await ensureActiveReading();
             App.saveProgress();
-            beginOrResumeQuiz();
         } catch (error) {
-            showDashboardMessage(humaniseError(error), "error");
+            console.error("Could not create the account reading immediately.", error);
+
+            const savedStatus = App.elements.savedStatus;
+            if (savedStatus) {
+                savedStatus.textContent =
+                    "This reading has started, but account saving is temporarily unavailable.";
+            }
         } finally {
             setButtonBusy(ui.newReadingButton, false);
         }
     }
 
     async function resumeLatestReading() {
-        hideReadingConsentMessage();
-        if (!validateReadingConsent()) return;
-
         const reading = account.readings.find(
             (item) => item.id === account.activeReadingId && item.status === "in_progress"
         ) || account.readings.find((item) => item.status === "in_progress");
@@ -872,8 +909,6 @@
             return;
         }
 
-        hideReadingConsentMessage();
-        if (!validateReadingConsent()) return;
         beginOrResumeQuiz();
     }
 
@@ -1348,40 +1383,6 @@
             "aria-label",
             account.user ? "Open your account" : "Sign in or create an account"
         );
-    }
-
-
-    function validateReadingConsent() {
-        if (!ui.readingAgeConfirmation?.checked) {
-            showReadingConsentMessage(
-                "Confirm that you are 18 or over and accept the Terms of Use before beginning or resuming a reading.",
-                "error"
-            );
-            ui.readingAgeConfirmation?.focus();
-            ui.readingConsentMessage?.scrollIntoView({ behavior: "smooth", block: "center" });
-            return false;
-        }
-
-        if (!ui.readingSensitiveConsent?.checked) {
-            showReadingConsentMessage(
-                "Explicit consent is required before optional identity, preference and beliefs answers can be processed for a personalised reading.",
-                "error"
-            );
-            ui.readingSensitiveConsent?.focus();
-            ui.readingConsentMessage?.scrollIntoView({ behavior: "smooth", block: "center" });
-            return false;
-        }
-
-        hideReadingConsentMessage();
-        return true;
-    }
-
-    function showReadingConsentMessage(message, type = "info") {
-        showMessage(ui.readingConsentMessage, message, type);
-    }
-
-    function hideReadingConsentMessage() {
-        hideMessage(ui.readingConsentMessage);
     }
 
     function showAuthMessage(message, type = "info") {

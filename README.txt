@@ -1,21 +1,29 @@
-MARRIAGE ORACLE — MOBILE ACCOUNT ACTION FIX
+MARRIAGE ORACLE — PAYMENT + LOGIN UX FIX
+==========================================
 
-Overwrite these three files:
+Overwrite these four files:
 
 index.html
-assets/js/auth.js
 assets/css/style.css
-
-Keep every other file unchanged, especially:
-assets/js/supabase-config.js
-assets/js/app.js
+assets/js/auth.js
 assets/js/payments.js
 
-What this fixes:
-- Continue as Guest now uses a delegated mobile-safe click handler.
-- Start a New Reading opens the quiz immediately instead of silently waiting for Supabase.
-- A visible message is shown if the quiz module has not loaded.
-- New cache versions force phones to download the current CSS and JavaScript.
-- The two main action buttons have reliable touch behaviour and full-width mobile hit areas.
+Keep all other files, including assets/js/supabase-config.js, unchanged.
 
-After uploading to GitHub Pages, wait for deployment and fully close/reopen the browser tab.
+WHAT THIS FIXES
+---------------
+1. Restores the legal purchase acknowledgement that was accidentally removed
+   by the previous mobile-actions index.html.
+2. Keeps the payment button clickable before acknowledgement, so clicking it
+   gives a visible instruction instead of appearing to do nothing.
+3. Shows checkout errors immediately beside the £0.99 button.
+4. Shows the sign-in requirement on the sign-in screen immediately, rather
+   than leaving it hidden on the results page.
+5. Preserves an entered complimentary code while the user signs in.
+6. Keeps Continue as Guest and Start a New Reading reliable on phones.
+7. Opens a new account reading immediately while Supabase saves in the
+   background.
+8. Uses cache version 20260731-payment-login-ux-v2 so phones fetch the repaired scripts.
+
+After pushing to GitHub Pages, close the browser tab completely and reopen
+https://themarriageoracle.com/ .

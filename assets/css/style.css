@@ -3723,3 +3723,35 @@ p {
         isolation: isolate;
     }
 }
+
+/* =====================================================
+   PAYMENT + SIGN-IN INTERACTION REPAIR
+   ===================================================== */
+
+.checkout-message {
+    margin: 0;
+}
+
+.unlock-payment-button.needs-consent {
+    opacity: 0.78;
+}
+
+.unlock-payment-button.needs-consent:hover {
+    opacity: 1;
+}
+
+.unlock-choice-panel .purchase-consent-row:focus-within {
+    border-color: var(--burgundy);
+    box-shadow: 0 0 0 3px rgba(111, 38, 53, 0.12);
+}
+
+@media (max-width: 760px) {
+    .unlock-choice-panel {
+        gap: 16px;
+    }
+
+    .checkout-message,
+    .promo-code-message {
+        scroll-margin-top: 96px;
+    }
+}

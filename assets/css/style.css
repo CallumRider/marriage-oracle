@@ -3695,3 +3695,31 @@ p {
         display: none;
     }
 }
+
+
+/* ==========================================================================
+   MOBILE ACCOUNT ACTION RELIABILITY
+   ========================================================================== */
+
+#guest-button,
+#account-new-reading-button {
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+@media (max-width: 760px) {
+    #guest-button,
+    #account-new-reading-button {
+        width: 100%;
+        min-height: 58px;
+    }
+
+    .choice-card,
+    .account-dashboard-actions {
+        position: relative;
+        isolation: isolate;
+    }
+}
